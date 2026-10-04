@@ -1,0 +1,333 @@
+import React, { useState } from 'react';
+import { X, Database, Check, AlertCircle, Copy, ExternalLink, RefreshCw, FileCode } from 'lucide-react';
+import { SheetConnectionConfig } from '../types/documentary.ts';
+
+interface GoogleSheetModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  config: SheetConnectionConfig | null;
+  onSaveConfig: (webAppUrl: string, mode: 'live' | 'seed') => Promise<void>;
+  onTriggerSync: (customUrl?: string, mode?: 'live' | 'seed') => Promise<any>;
+}
+
+export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
+  isOpen,
+  onClose,
+  config,
+  onSaveConfig,
+  onTriggerSync
+}) => {
+  const [activeTab, setActiveTab] = useState<'connect' | 'script'>('connect');
+  const [urlInput, setUrlInput] = useState(config?.webAppUrl || '');
+  const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string; count?: number } | null>(null);
+  const [copiedScript, setCopiedScript] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleTestAndSave = async (mode: 'live' | 'seed') => {
+    setIsTesting(true);
+    setTestResult(null);
+    try {
+      if (mode === 'seed') {
+        const res = await onTriggerSync('', 'seed');
+        setTestResult({
+          success: true,
+          message: 'مخزن با موفقیت به داده‌های استاندارد داخلی بازگردانی شد.',
+          count: res.count
+        });
+        await onSaveConfig('', 'seed');
+      } else {
+        if (!urlInput.trim()) {
+          setTestResult({
+            success: false,
+            message: 'لطفاً آدرس Web App گوگل شیت را وارد نمایید.'
+          });
+          setIsTesting(false);
+          return;
+        }
+
+        const res = await onTriggerSync(urlInput.trim(), 'live');
+        setTestResult({
+          success: true,
+          message: `اتصال با موفقیت برقرار شد. تعداد ${res.count} رکورد همگام گردید.`,
+          count: res.count
+        });
+        await onSaveConfig(urlInput.trim(), 'live');
+      }
+    } catch (err: any) {
+      setTestResult({
+        success: false,
+        message: err.message || 'خطا در برقراری ارتباط با گوگل شیت.'
+      });
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  const handleCopyScript = () => {
+    const code = `/**
+ * Google Apps Script Web App for Documentary Metadata Hub
+ * 
+ * Instructions:
+ * 1. Open your Google Sheet
+ * 2. Click Extensions > Apps Script
+ * 3. Paste this code and save (Ctrl+S)
+ * 4. Click Deploy > New deployment
+ * 5. Type: Web app, Execute as: Me, Access: Anyone
+ * 6. Copy the Web App URL and paste it into DocuSheet API Hub!
+ */
+
+function doGet(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = sheet.getDataRange().getValues();
+    if (data.length <= 1) {
+      return ContentService.createTextOutput(JSON.stringify({ data: [] }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    var headers = data[0].map(function(h) { return String(h).trim(); });
+    var rows = [];
+    
+    for (var i = 1; i < data.length; i++) {
+      var rowObj = {};
+      for (var j = 0; j < headers.length; j++) {
+        var key = headers[j];
+        var val = data[i][j];
+        if (key) {
+          rowObj[key] = val !== null && val !== undefined ? String(val) : "";
+        }
+      }
+      rows.push(rowObj);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      count: rows.length,
+      timestamp: new Date().toISOString(),
+      data: rows
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
+    navigator.clipboard.writeText(code);
+    setCopiedScript(true);
+    setTimeout(() => setCopiedScript(false), 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+      <div
+        className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-neutral-100 flex flex-col max-h-[90vh] overflow-hidden"
+        dir="rtl"
+      >
+        {/* Header */}
+        <div className="p-4 sm:p-6 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
+          <div className="flex items-center space-x-2 space-x-reverse">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <Database className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-neutral-900">
+                پیکربندی اتصال به گوگل شیت (Google Sheets API / Web App)
+              </h3>
+              <p className="text-xs text-neutral-500">
+                خواندن امن داده‌ها از شیت و تحویل به عنوان API داخلی با صفحه‌بندی
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-100 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b border-neutral-200/80 px-4 sm:px-6 bg-white text-xs sm:text-sm">
+          <button
+            onClick={() => setActiveTab('connect')}
+            className={`py-3 px-3 font-medium border-b-2 transition-colors ${
+              activeTab === 'connect'
+                ? 'border-neutral-900 text-neutral-900'
+                : 'border-transparent text-neutral-500 hover:text-neutral-900'
+            }`}
+          >
+            اتصال آدرس Web App
+          </button>
+          <button
+            onClick={() => setActiveTab('script')}
+            className={`py-3 px-3 font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
+              activeTab === 'script'
+                ? 'border-neutral-900 text-neutral-900'
+                : 'border-transparent text-neutral-500 hover:text-neutral-900'
+            }`}
+          >
+            <FileCode className="w-4 h-4" />
+            <span>کد Apps Script شیت</span>
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-neutral-800 flex-1">
+          {activeTab === 'connect' && (
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-700">
+                    آدرس Google Apps Script Web App یا اندپوینت شیت
+                  </label>
+                  {config?.webAppUrl && (
+                    <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                      بارگذاری شده از Secrets (WEB_APP_URL)
+                    </span>
+                  )}
+                </div>
+                <input
+                  type="url"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  placeholder="https://script.google.com/macros/s/.../exec"
+                  className="w-full px-3 py-2 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:bg-white transition-all font-mono"
+                  dir="ltr"
+                />
+                <p className="text-[11px] text-neutral-500 mt-1.5 leading-relaxed">
+                  آدرس وب‌سرویس Apps Script با متغیر WEB_APP_URL در بخش Secrets همگام شده است.
+                </p>
+              </div>
+
+              {/* Status & Feedback */}
+              {testResult && (
+                <div
+                  className={`p-3.5 rounded-xl border flex items-start space-x-2 space-x-reverse text-xs leading-relaxed ${
+                    testResult.success
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                      : 'bg-red-50 border-red-200 text-red-900'
+                  }`}
+                >
+                  {testResult.success ? (
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                  )}
+                  <span>{testResult.message}</span>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+                <button
+                  onClick={() => handleTestAndSave('live')}
+                  disabled={isTesting}
+                  className="flex-1 inline-flex items-center justify-center space-x-1.5 space-x-reverse px-4 py-2.5 rounded-lg text-xs font-semibold text-white bg-neutral-900 hover:bg-neutral-800 disabled:opacity-50 transition-colors shadow-xs"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isTesting ? 'animate-spin' : ''}`} />
+                  <span>{isTesting ? 'در حال تست و اتصال...' : 'اتصال و سینک شیت زنده'}</span>
+                </button>
+
+                <button
+                  onClick={() => handleTestAndSave('seed')}
+                  disabled={isTesting}
+                  className="px-4 py-2.5 rounded-lg text-xs font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 transition-colors"
+                >
+                  بازنشانی به داده‌های آزمایشی استاندارد
+                </button>
+              </div>
+
+              {/* Quick instructions */}
+              <div className="mt-4 p-4 rounded-xl bg-neutral-50/80 border border-neutral-100 space-y-2 text-xs text-neutral-600">
+                <span className="font-semibold text-neutral-900 block mb-1">
+                  نحوه راه‌اندازی سریع در گوگل شیت:
+                </span>
+                <ol className="list-decimal list-inside space-y-1 text-neutral-600">
+                  <li>فایل شیت خود را در Google Drive باز کنید.</li>
+                  <li>از منوی <strong>Extensions</strong> گزینه <strong>Apps Script</strong> را بزنید.</li>
+                  <li>کد آماده موجود در تب «کد Apps Script شیت» را در آن کپی کنید.</li>
+                  <li>روی <strong>Deploy &gt; New deployment &gt; Web app</strong> کلیک کنید (دسترسی: Anyone).</li>
+                  <li>آدرس تولیدشده را در کادر بالا وارد کرده و کلید اتصال را بزنید!</li>
+                </ol>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'script' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-neutral-600">
+                  این اسکریپت سبک داده‌های ردیف‌های شیت شما را خوانده و در قالب JSON استاندارد تحویل می‌دهد:
+                </p>
+                <button
+                  onClick={handleCopyScript}
+                  className="inline-flex items-center space-x-1 space-x-reverse text-xs bg-neutral-900 text-white px-3 py-1.5 rounded-lg hover:bg-neutral-800 transition-colors"
+                >
+                  {copiedScript ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedScript ? 'کپی شد' : 'کپی اسکریپت'}</span>
+                </button>
+              </div>
+
+              <pre
+                className="bg-neutral-900 text-neutral-100 p-4 rounded-xl text-xs font-mono overflow-x-auto max-h-[360px] leading-relaxed select-all"
+                dir="ltr"
+              >
+{`function doGet(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = sheet.getDataRange().getValues();
+    if (data.length <= 1) {
+      return ContentService.createTextOutput(JSON.stringify({ data: [] }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    var headers = data[0].map(function(h) { return String(h).trim(); });
+    var rows = [];
+    
+    for (var i = 1; i < data.length; i++) {
+      var rowObj = {};
+      for (var j = 0; j < headers.length; j++) {
+        var key = headers[j];
+        var val = data[i][j];
+        if (key) {
+          rowObj[key] = val !== null && val !== undefined ? String(val) : "";
+        }
+      }
+      rows.push(rowObj);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      count: rows.length,
+      timestamp: new Date().toISOString(),
+      data: rows
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      error: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}`}
+              </pre>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-neutral-100 bg-neutral-50/50 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+          >
+            بستن
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

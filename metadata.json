@@ -1,0 +1,6 @@
+{
+  "name": "DocuSheet API & Metadata Hub",
+  "description": "Backend infrastructure, Google Sheets sync, and strict JSON documentary metadata API dashboard with pagination and query tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
