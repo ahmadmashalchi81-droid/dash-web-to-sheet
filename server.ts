@@ -86,12 +86,13 @@ app.get('/api/v1/documentaries', (req: Request, res: Response) => {
     const page = Math.max(1, parseInt(String(req.query.page || '1'), 10));
     const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit || '10'), 10)));
     const q = String(req.query.q || req.query.search || '').trim().toLowerCase();
-    const topic = String(req.query.topic || '').trim().toLowerCase();
+    const topic = String(req.query.topic || req.query.main_topic || '').trim().toLowerCase();
     const verification = String(req.query.verification || '').trim().toLowerCase();
     const mode = String(req.query.mode || '').trim().toLowerCase();
     const isSeries = String(req.query.is_series || '').trim().toLowerCase();
-    const format = String(req.query.format || '').trim().toLowerCase();
+    const format = String(req.query.format || req.query.format_category || '').trim().toLowerCase();
     const timeCategory = String(req.query.time_category || '').trim().toLowerCase();
+    const temporalEra = String(req.query.temporal_era || req.query.temporalEra || '').trim().toLowerCase();
     const tag = String(req.query.tag || '').trim().toLowerCase();
     const location = String(req.query.location || '').trim().toLowerCase();
     const keyword = String(req.query.keyword || '').trim().toLowerCase();
@@ -129,12 +130,14 @@ app.get('/api/v1/documentaries', (req: Request, res: Response) => {
       });
     }
 
-    // Filter by Topic
+    // Filter by Topic (with resilient normalization for Persian diacritics/kasrah)
     if (topic && topic !== 'all') {
-      filtered = filtered.filter((doc) =>
-        doc.main_topic.toLowerCase().includes(topic) ||
-        doc.sub_topic.toLowerCase().includes(topic)
-      );
+      const cleanTopic = topic.replace(/[ًٌٍَُِّْ\u200C]/g, '').trim();
+      filtered = filtered.filter((doc) => {
+        const docMain = (doc.main_topic || '').replace(/[ًٌٍَُِّْ\u200C]/g, '').toLowerCase();
+        const docSub = (doc.sub_topic || '').replace(/[ًٌٍَُِّْ\u200C]/g, '').toLowerCase();
+        return docMain.includes(cleanTopic) || docSub.includes(cleanTopic);
+      });
     }
 
     // Filter by Verification Status (handles Persian and English)
@@ -181,6 +184,15 @@ app.get('/api/v1/documentaries', (req: Request, res: Response) => {
       filtered = filtered.filter((doc) =>
         doc.time_category.toLowerCase().includes(timeCategory)
       );
+    }
+
+    // Filter by temporal_era per Phase 4 Roadmap
+    if (temporalEra && temporalEra !== 'all') {
+      const cleanEra = temporalEra.replace(/[ًٌٍَُِّْ\u200C]/g, '').trim();
+      filtered = filtered.filter((doc) => {
+        const docEra = (doc.temporal_era || '').replace(/[ًٌٍَُِّْ\u200C]/g, '').toLowerCase();
+        return docEra.includes(cleanEra);
+      });
     }
 
     // Filter by Flat Arrays (thematic_tags, geographical_locations, semantic_keywords, languages_and_dialects)

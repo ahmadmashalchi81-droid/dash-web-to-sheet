@@ -3,9 +3,9 @@ import { DocumentaryMetadata } from '../types/documentary.ts';
 export const SEED_DOCUMENTARIES: DocumentaryMetadata[] = [
   {
     asset_id: "DOC-IR-1402-001",
-    title_extracted: "روایت معلم بلم‌سوار: طارق عچرش",
-    title_finglish: "Revayat-e Moallem-e Balam-Savar: Tareq Achresh",
-    international_title: "The Boatman Teacher: Tareq Achresh",
+    title_extracted: "از نیل تا کارون",
+    title_finglish: "Az Nil ta Karoon",
+    international_title: "From Nile to Karun: Tareq Achresh",
     is_series: "false",
     episode_number: "",
     logline: "داستان فداکاری آقا معلمی جوان در روستای محروم مقطوع خوزستان که هر روز با بلم چوبی از میان تالاب می‌گذرد تا پرچم آموزش در محروم‌ترین نقطه زنده بماند.",
@@ -635,8 +635,8 @@ export const SEED_DOCUMENTARIES: DocumentaryMetadata[] = [
     long_synopsis: "این مستند با بهره‌گیری از اعترافات صریح، نامه‌های منتشرنشده خانوادگی و اسناد بصری درون‌تشکیلاتی، فرآیند گسستن پیوندهای عاطفی، طلاق‌های اجباری و ایزولاسیون روانی در پادگان اشرف و لیبرتی را بررسی می‌کند. بخش دوم فیلم بر چگونگی شکل‌گیری نجات و احیای هویت فردی تمرکز دارد.",
     technical_judicial_notes: "دارای تاییدیه امنیتی ستاد حقوق بشر و بدون افشای هویت فعلی بستگان نجات‌یافتگان.",
     format_category: "مستند بلند سیاسی - پژوهشی",
-    main_topic: "سیاسی و تاریخ معاصر",
-    sub_topic: "افشای ماهیت فرقه‌ای سازمان مجاهدین خلق (منافقین)",
+    main_topic: "ملتِ مبعوث",
+    sub_topic: "سیاسی و تاریخ معاصر - افشای ماهیت فرقه‌ای سازمان مجاهدین خلق (منافقین)",
     time_category: "دهه ۱۳۶۰ تا کنون",
     duration_exact: "00:58:15",
     documentary_mode: "تحقیقی و شهادتی (Testimonial & Investigative)",

@@ -33,12 +33,16 @@ export default function App() {
   const [search, setSearch] = useState<string>('');
   const [debouncedSearch, setDebouncedSearch] = useState<string>('');
   const [selectedTopic, setSelectedTopic] = useState<string>('all');
+  const [selectedFormat, setSelectedFormat] = useState<string>('all');
+  const [selectedTemporalEra, setSelectedTemporalEra] = useState<string>('all');
   const [selectedVerification, setSelectedVerification] = useState<string>('all');
   const [selectedIsSeries, setSelectedIsSeries] = useState<string>('all');
   const [selectedTimeCategory, setSelectedTimeCategory] = useState<string>('all');
   const [limit, setLimit] = useState<number>(10);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [allTopics, setAllTopics] = useState<string[]>([]);
+  const [allFormats, setAllFormats] = useState<string[]>([]);
+  const [allEras, setAllEras] = useState<string[]>([]);
 
   // Modals
   const [selectedDoc, setSelectedDoc] = useState<DocumentaryMetadata | null>(null);
@@ -87,6 +91,8 @@ export default function App() {
 
       if (debouncedSearch) params.set('q', debouncedSearch);
       if (selectedTopic !== 'all') params.set('topic', selectedTopic);
+      if (selectedFormat !== 'all') params.set('format', selectedFormat);
+      if (selectedTemporalEra !== 'all') params.set('temporal_era', selectedTemporalEra);
       if (selectedVerification !== 'all') params.set('verification', selectedVerification);
       if (selectedIsSeries !== 'all') params.set('is_series', selectedIsSeries);
       if (selectedTimeCategory !== 'all') params.set('time_category', selectedTimeCategory);
@@ -102,12 +108,22 @@ export default function App() {
         setDataSource(data.dataSource);
         setLastSyncTime(data.lastSyncTime);
 
-        // Collect unique topics
+        // Collect unique topics, formats, and eras
         if (data.data.length > 0) {
           const topics = Array.from(
             new Set(data.data.map((d) => d.main_topic).filter(Boolean))
           );
           setAllTopics((prev) => Array.from(new Set([...prev, ...topics])));
+
+          const formats = Array.from(
+            new Set(data.data.map((d) => d.format_category).filter(Boolean))
+          );
+          setAllFormats((prev) => Array.from(new Set([...prev, ...formats])));
+
+          const eras = Array.from(
+            new Set(data.data.map((d) => d.temporal_era).filter(Boolean))
+          );
+          setAllEras((prev) => Array.from(new Set([...prev, ...eras])));
         }
       }
     } catch (err: any) {
@@ -116,7 +132,7 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, selectedTopic, selectedVerification, selectedIsSeries, selectedTimeCategory, limit]);
+  }, [debouncedSearch, selectedTopic, selectedFormat, selectedTemporalEra, selectedVerification, selectedIsSeries, selectedTimeCategory, limit]);
 
   useEffect(() => {
     fetchConfig();
@@ -172,6 +188,8 @@ export default function App() {
   const handleResetFilters = () => {
     setSearch('');
     setSelectedTopic('all');
+    setSelectedFormat('all');
+    setSelectedTemporalEra('all');
     setSelectedVerification('all');
     setSelectedIsSeries('all');
     setSelectedTimeCategory('all');
@@ -234,12 +252,16 @@ export default function App() {
           kpiMetrics={kpiMetrics}
         />
 
-        {/* Query Toolbar with Section 1 Filters */}
+        {/* Query Toolbar with Section 1 & Phase 4 Advanced Filters */}
         <QueryToolbar
           search={search}
           onSearchChange={setSearch}
           selectedTopic={selectedTopic}
           onTopicChange={setSelectedTopic}
+          selectedFormat={selectedFormat}
+          onFormatChange={setSelectedFormat}
+          selectedTemporalEra={selectedTemporalEra}
+          onTemporalEraChange={setSelectedTemporalEra}
           selectedVerification={selectedVerification}
           onVerificationChange={setSelectedVerification}
           selectedIsSeries={selectedIsSeries}
@@ -252,6 +274,8 @@ export default function App() {
           onViewModeChange={setViewMode}
           onReset={handleResetFilters}
           topicsList={allTopics}
+          formatsList={allFormats}
+          erasList={allEras}
         />
 
         {/* Loading Spinner or View */}
