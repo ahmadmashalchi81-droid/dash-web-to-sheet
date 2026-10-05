@@ -1,0 +1,17 @@
+[vars]
+# Add any environment variables needed by your worker here
+
+[env.production]
+account_id = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+workers_dev = false
+route = "https://dash-web-to-sheet.ahmad-mashalchi81.workers.dev/*"
+name = "dash-web-to-sheet"
+
+[triggers]
+# Optional: define scheduled triggers if needed
+
+[build]
+command = "npm run build"
+[site]
+bucket = "./dist"
+entry-point = "./"

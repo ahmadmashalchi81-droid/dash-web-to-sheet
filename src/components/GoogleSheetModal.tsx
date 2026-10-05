@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Database, Check, AlertCircle, Copy, ExternalLink, RefreshCw, FileCode } from 'lucide-react';
 import { SheetConnectionConfig } from '../types/documentary.ts';
 
@@ -6,8 +6,8 @@ interface GoogleSheetModalProps {
   isOpen: boolean;
   onClose: () => void;
   config: SheetConnectionConfig | null;
-  onSaveConfig: (webAppUrl: string, mode: 'live' | 'seed') => Promise<void>;
-  onTriggerSync: (customUrl?: string, mode?: 'live' | 'seed') => Promise<any>;
+  onSaveConfig: (webAppUrl: string, mode: 'live' | 'seed', sheetName?: string) => Promise<void>;
+  onTriggerSync: (customUrl?: string, mode?: 'live' | 'seed', sheetName?: string) => Promise<any>;
 }
 
 export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
@@ -19,9 +19,23 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'connect' | 'script'>('connect');
   const [urlInput, setUrlInput] = useState(config?.webAppUrl || '');
+  const [sheetNameInput, setSheetNameInput] = useState(config?.sheetName || 'temp');
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string; count?: number } | null>(null);
   const [copiedScript, setCopiedScript] = useState(false);
+  const [scriptCode, setScriptCode] = useState<string>('');
+
+  useEffect(() => {
+    if (config?.webAppUrl) setUrlInput(config.webAppUrl);
+    if (config?.sheetName) setSheetNameInput(config.sheetName);
+  }, [config]);
+
+  useEffect(() => {
+    fetch('/api/v1/google-apps-script')
+      .then((res) => res.text())
+      .then((text) => setScriptCode(text))
+      .catch((err) => console.error('Failed to load Google Apps Script:', err));
+  }, []);
 
   if (!isOpen) return null;
 
@@ -30,13 +44,13 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
     setTestResult(null);
     try {
       if (mode === 'seed') {
-        const res = await onTriggerSync('', 'seed');
+        const res = await onTriggerSync('', 'seed', sheetNameInput.trim() || 'temp');
         setTestResult({
           success: true,
           message: 'مخزن با موفقیت به داده‌های استاندارد داخلی بازگردانی شد.',
           count: res.count
         });
-        await onSaveConfig('', 'seed');
+        await onSaveConfig('', 'seed', sheetNameInput.trim() || 'temp');
       } else {
         if (!urlInput.trim()) {
           setTestResult({
@@ -47,13 +61,13 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
           return;
         }
 
-        const res = await onTriggerSync(urlInput.trim(), 'live');
+        const res = await onTriggerSync(urlInput.trim(), 'live', sheetNameInput.trim() || 'temp');
         setTestResult({
           success: true,
-          message: `اتصال با موفقیت برقرار شد. تعداد ${res.count} رکورد همگام گردید.`,
+          message: `اتصال با موفقیت برقرار شد. برگه «${res.sheetName || sheetNameInput.trim() || 'temp'}» همگام گردید (تعداد ${res.count} رکورد).`,
           count: res.count
         });
-        await onSaveConfig(urlInput.trim(), 'live');
+        await onSaveConfig(urlInput.trim(), 'live', sheetNameInput.trim() || 'temp');
       }
     } catch (err: any) {
       setTestResult({
@@ -66,70 +80,23 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
   };
 
   const handleCopyScript = () => {
-    const code = `/**
- * Google Apps Script Web App for Documentary Metadata Hub
- * 
- * Instructions:
- * 1. Open your Google Sheet
- * 2. Click Extensions > Apps Script
- * 3. Paste this code and save (Ctrl+S)
- * 4. Click Deploy > New deployment
- * 5. Type: Web app, Execute as: Me, Access: Anyone
- * 6. Copy the Web App URL and paste it into DocuSheet API Hub!
- */
-
-function doGet(e) {
-  try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var data = sheet.getDataRange().getValues();
-    if (data.length <= 1) {
-      return ContentService.createTextOutput(JSON.stringify({ data: [] }))
-        .setMimeType(ContentService.MimeType.JSON);
+    if (scriptCode) {
+      navigator.clipboard.writeText(scriptCode);
+      setCopiedScript(true);
+      setTimeout(() => setCopiedScript(false), 2000);
     }
-    
-    var headers = data[0].map(function(h) { return String(h).trim(); });
-    var rows = [];
-    
-    for (var i = 1; i < data.length; i++) {
-      var rowObj = {};
-      for (var j = 0; j < headers.length; j++) {
-        var key = headers[j];
-        var val = data[i][j];
-        if (key) {
-          rowObj[key] = val !== null && val !== undefined ? String(val) : "";
-        }
-      }
-      rows.push(rowObj);
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      success: true,
-      count: rows.length,
-      timestamp: new Date().toISOString(),
-      data: rows
-    })).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({
-      success: false,
-      error: err.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-}`;
-    navigator.clipboard.writeText(code);
-    setCopiedScript(true);
-    setTimeout(() => setCopiedScript(false), 2000);
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
       <div
-        className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-neutral-100 flex flex-col max-h-[90vh] overflow-hidden"
+        className="bg-white w-full max-w-2xl rounded-2xl shadow-xl border border-neutral-200/80 flex flex-col max-h-[90vh] overflow-hidden"
         dir="rtl"
       >
         {/* Header */}
-        <div className="p-4 sm:p-6 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+        <div className="p-4 sm:p-6 border-b border-neutral-200/80 flex items-center justify-between bg-neutral-50/60">
+          <div className="flex items-center space-x-2.5 space-x-reverse">
+            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center">
               <Database className="w-4 h-4" />
             </div>
             <div>
@@ -144,7 +111,7 @@ function doGet(e) {
 
           <button
             onClick={onClose}
-            className="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-100 transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -200,6 +167,28 @@ function doGet(e) {
                 />
                 <p className="text-[11px] text-neutral-500 mt-1.5 leading-relaxed">
                   آدرس وب‌سرویس Apps Script با متغیر WEB_APP_URL در بخش Secrets همگام شده است.
+                </p>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-neutral-700">
+                    نام برگه (تب) فعال در گوگل‌شیت
+                  </label>
+                  <span className="text-[11px] font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                    برگه تست: temp
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={sheetNameInput}
+                  onChange={(e) => setSheetNameInput(e.target.value)}
+                  placeholder="temp یا کلیدهای_اصلی_JSON"
+                  className="w-full px-3 py-2 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:bg-white transition-all font-mono"
+                  dir="ltr"
+                />
+                <p className="text-[11px] text-neutral-500 mt-1.5 leading-relaxed">
+                  برگه نمونه پیش‌فرض <code className="bg-neutral-100 text-neutral-800 px-1 py-0.5 rounded font-mono">temp</code> در شیت «تمرین ۱» شامل ۱۰۰۰ رکورد آزمایشی است. پس از تست می‌توانید نام تب را تغییر دهید.
                 </p>
               </div>
 
@@ -276,43 +265,7 @@ function doGet(e) {
                 className="bg-neutral-900 text-neutral-100 p-4 rounded-xl text-xs font-mono overflow-x-auto max-h-[360px] leading-relaxed select-all"
                 dir="ltr"
               >
-{`function doGet(e) {
-  try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var data = sheet.getDataRange().getValues();
-    if (data.length <= 1) {
-      return ContentService.createTextOutput(JSON.stringify({ data: [] }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    var headers = data[0].map(function(h) { return String(h).trim(); });
-    var rows = [];
-    
-    for (var i = 1; i < data.length; i++) {
-      var rowObj = {};
-      for (var j = 0; j < headers.length; j++) {
-        var key = headers[j];
-        var val = data[i][j];
-        if (key) {
-          rowObj[key] = val !== null && val !== undefined ? String(val) : "";
-        }
-      }
-      rows.push(rowObj);
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      success: true,
-      count: rows.length,
-      timestamp: new Date().toISOString(),
-      data: rows
-    })).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({
-      success: false,
-      error: err.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-}`}
+                {scriptCode || '// در حال بارگذاری اسکریپت از سرور...'}
               </pre>
             </div>
           )}

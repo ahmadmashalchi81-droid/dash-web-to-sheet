@@ -58,13 +58,13 @@ export const ApiExplorerModal: React.FC<ApiExplorerModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
       <div
-        className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-neutral-100 flex flex-col max-h-[90vh] overflow-hidden"
+        className="bg-white w-full max-w-4xl rounded-2xl shadow-xl border border-neutral-200/80 flex flex-col max-h-[90vh] overflow-hidden"
         dir="rtl"
       >
         {/* Header */}
-        <div className="p-4 sm:p-6 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
-          <div className="flex items-center space-x-2 space-x-reverse">
-            <div className="w-8 h-8 rounded-lg bg-neutral-900 text-white flex items-center justify-center">
+        <div className="p-4 sm:p-6 border-b border-neutral-200/80 flex items-center justify-between bg-neutral-50/60">
+          <div className="flex items-center space-x-2.5 space-x-reverse">
+            <div className="w-9 h-9 rounded-xl bg-neutral-900 text-white flex items-center justify-center shadow-xs">
               <Terminal className="w-4 h-4" />
             </div>
             <div>
@@ -79,7 +79,7 @@ export const ApiExplorerModal: React.FC<ApiExplorerModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-100 transition-colors"
+            className="w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

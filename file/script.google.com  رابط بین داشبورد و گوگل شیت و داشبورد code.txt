@@ -1,0 +1,622 @@
+/**
+ * ====================================================================================
+ * وب‌سرویس اختصاصی Google Apps Script (Web App) - نسخه دوطرفه و جامع (v3.0.0)
+ * سیستم یکپارچه مدیریت متادیتای مستندها (DocuSheet API & Metadata Hub)
+ * منطبق دقیق بر ساختار ۶۶ ستونه فایل مرجع (تست 1.xlsx) و شیت «کلیدهای_اصلی_JSON»
+ * ====================================================================================
+ * نحوه راه‌اندازی و استقرار (Deploy):
+ * ۱. این کد را در مسیر Extensions > Apps Script در فایل Google Sheet خود قرار دهید.
+ * ۲. از منوی Deploy > New deployment را انتخاب کنید.
+ * ۳. نوع (Type) را روی Web app بگذارید.
+ * ۴. Execute as را روی "Me" و Who has access را روی "Anyone" تنظیم نمایید.
+ * ۵. آدرس URL به دست آمده را در داشبورد (بخش اتصال شیت) وارد کنید.
+ * ====================================================================================
+ */
+
+// نام برگه (تب) فعال در گوگل شیت جهت ذخیره و بازخوانی اطلاعات
+// به صورت پیش‌فرض و موقت روی تب 'temp' در شیت «تمرین 1» تنظیم شده است
+// همچنین قابلیت پذیرش داینامیک نام تب از طریق پارامتر کوئری‌استرینگ (sheet, tab, sheetName) یا بادی POST را دارد
+var DEFAULT_SHEET_NAME = 'temp';
+var SHEET_NAME = DEFAULT_SHEET_NAME;
+
+// عناوین رسمی و ۶۶ گانه ستون‌های جدول شناسنامه در گوگل شیت (دقیقاً منطبق بر تست 1.xlsx)
+var HEADERS = [
+  'asset_id',
+  'title_extracted',
+  'title_finglish',
+  'international_title',
+  'is_series',
+  'episode_number',
+  'logline',
+  'short_synopsis',
+  'long_synopsis',
+  'technical_judicial_notes',
+  'format_category',
+  'main_topic',
+  'sub_topic',
+  'time_category',
+  'duration_exact',
+  'documentary_mode',
+  'temporal_era',
+  'symbols_and_motifs',
+  'geographical_locations',
+  'main_protagonist_subject',
+  'core_message',
+  'subject_profession',
+  'keyframe_timestamps_5frames',
+  'crew.director',
+  'crew.producer_individual',
+  'crew.legal_producer_entity',
+  'crew.executive_producer',
+  'crew.screenwriter',
+  'crew.researcher',
+  'crew.cinematographer',
+  'crew.camera_operator',
+  'crew.sound_recordist',
+  'crew.sound_designer',
+  'crew.editor',
+  'crew.music_composer',
+  'crew.music_arranger',
+  'crew.narrator',
+  'crew.actors',
+  'crew.production_manager',
+  'crew.set_and_costume_designer',
+  'crew.vfx_designer',
+  'crew.title_and_graphic_designer',
+  'crew.still_photographer',
+  'crew.poet_lyricist',
+  'crew.singer_vocalist',
+  'crew.choral_group',
+  'crew.animator',
+  'crew.reporter',
+  'interviewees_with_timecodes',
+  'archival_footage_log.status',
+  'archival_footage_log.timecodes',
+  'archival_footage_log.source_evidence',
+  'music_cues',
+  'thematic_tags',
+  'semantic_keywords',
+  'languages_and_dialects',
+  'visual_qc',
+  'audio_style',
+  'content_advisory_and_warnings',
+  'recommended_age_rating',
+  'ammar_discourse_score',
+  'ammar_discourse_reasons',
+  'subtitles_srt',
+  'confidence_score',
+  'human_verification_status',
+  'system_review_flags'
+];
+
+/**
+ * مدیریت درخواست‌های GET (خواندن زنده سطرها و بازسازی خودکار شیء تو در توی JSON)
+ */
+function doGet(e) {
+  try {
+    var action = (e && e.parameter && e.parameter.action) || 'read';
+    var requestedSheet = (e && e.parameter && (e.parameter.sheet || e.parameter.sheetName || e.parameter.tab)) || DEFAULT_SHEET_NAME;
+
+    // ۱. در صورت ارسال پارامتر action=ping برای Health-Check سریع
+    if (action === 'ping') {
+      return responseJson({
+        status: 'active',
+        service: 'Ammar Documentary Registration Web App API',
+        version: '3.1.0',
+        sheetName: requestedSheet,
+        columnsCount: HEADERS.length,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = getOrCreateSheet(ss, requestedSheet);
+    var data = sheet.getDataRange().getValues();
+
+    if (data.length === 0) {
+      return responseJson({
+        success: true,
+        count: 0,
+        data: [],
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    var sheetHeaders = data[0].map(function(h) { return String(h).trim(); });
+    var hasEnglishAssetId = false;
+    for (var h = 0; h < sheetHeaders.length; h++) {
+      if (sheetHeaders[h].toLowerCase() === 'asset_id') {
+        hasEnglishAssetId = true;
+        break;
+      }
+    }
+
+    var startRow = 1;
+    var effectiveHeaders = sheetHeaders;
+
+    if (!hasEnglishAssetId) {
+      // Determine if row 0 is actually data (e.g. numeric ID) or non-English headers
+      var firstCell = String(data[0][0] || '').trim();
+      if (/^\d+$/.test(firstCell) || /^DOC-/i.test(firstCell)) {
+        startRow = 0;
+      } else {
+        startRow = 1;
+      }
+      effectiveHeaders = HEADERS;
+    }
+
+    if (data.length <= startRow) {
+      return responseJson({
+        success: true,
+        count: 0,
+        data: [],
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // ۲. در صورتی که درخواست رکورد خاصی بر اساس ID باشد: action=get&id=1504595
+    var targetId = (e && e.parameter && (e.parameter.id || e.parameter.asset_id));
+    if (targetId) {
+      var searchClean = String(targetId).trim().toLowerCase();
+      for (var r = startRow; r < data.length; r++) {
+        var rowId = String(data[r][0] || '').trim().toLowerCase();
+        if (rowId === searchClean) {
+          var singleDoc = buildPayloadFromRow(data[r], effectiveHeaders);
+          return responseJson({
+            success: true,
+            found: true,
+            row: r + 1,
+            data: singleDoc
+          });
+        }
+      }
+      return responseJson({
+        success: false,
+        found: false,
+        message: 'Documentary with asset_id "' + targetId + '" not found.'
+      });
+    }
+
+    // ۳. بازخوانی کلیه سطرها و بازسازی ساختار استاندارد JSON
+    var documentaries = [];
+    for (var r = startRow; r < data.length; r++) {
+      var row = data[r];
+      var rowEmpty = true;
+      for (var c = 0; c < row.length; c++) {
+        if (row[c] !== "" && row[c] !== null && row[c] !== undefined) {
+          rowEmpty = false;
+          break;
+        }
+      }
+      if (rowEmpty) continue;
+
+      var doc = buildPayloadFromRow(row, effectiveHeaders);
+      if (doc && (doc.asset_id || doc.title_extracted)) {
+        documentaries.push(doc);
+      }
+    }
+
+    return responseJson({
+      success: true,
+      count: documentaries.length,
+      timestamp: new Date().toISOString(),
+      data: documentaries
+    });
+
+  } catch (err) {
+    return responseJson({
+      success: false,
+      error: 'GET Server Error: ' + err.toString()
+    });
+  }
+}
+
+/**
+ * مدیریت درخواست‌های POST (دریافت Raw JSON و ثبت/بروزرسانی در ۶۶ ستون گوگل‌شیت)
+ */
+function doPost(e) {
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return responseJson({
+        status: 'error',
+        message: 'No payload received in request body'
+      });
+    }
+
+    var payload = JSON.parse(e.postData.contents);
+    var data = payload.jsonContent || payload.data || payload;
+    var duplicateAction = payload.duplicateAction || payload.action || 'append';
+    var requestedSheet = (payload && (payload.sheet || payload.sheetName || payload.tab)) ||
+                         (e && e.parameter && (e.parameter.sheet || e.parameter.sheetName || e.parameter.tab)) ||
+                         DEFAULT_SHEET_NAME;
+
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = getOrCreateSheet(ss, requestedSheet);
+
+    var assetId = String(data.asset_id || data['کد اثر (Asset ID)'] || '').trim();
+
+    // بررسی وجود کد اثر تکراری در شیت
+    var existingRow = findRowByAssetId(sheet, assetId);
+
+    // ۱. بررسی سریع تکراری بودن کد اثر
+    if (duplicateAction === 'check') {
+      return responseJson({
+        status: 'success',
+        isDuplicate: existingRow > 0,
+        existingRow: existingRow > 0 ? existingRow : null,
+        assetId: assetId
+      });
+    }
+
+    // ۲. عملیات حذف سطر بر اساس کد اثر
+    if (duplicateAction === 'delete' && existingRow > 0) {
+      sheet.deleteRow(existingRow);
+      return responseJson({
+        status: 'success',
+        message: 'کد اثر ' + assetId + ' با موفقیت از گوگل شیت حذف گردید.',
+        action: 'deleted',
+        sheetUrl: ss.getUrl()
+      });
+    }
+
+    // تبدیل شیء JSON به آرایه ۶۶ ستونه منطبق بر تست 1.xlsx
+    var rowValues = buildRowFromPayload(data);
+
+    // ۳. به‌روزرسانی ردیف موجود (Update)
+    if (existingRow > 0 && duplicateAction === 'update') {
+      sheet.getRange(existingRow, 1, 1, rowValues.length).setValues([rowValues]);
+      return responseJson({
+        status: 'success',
+        message: 'اطلاعات مستند ' + assetId + ' در ردیف ' + existingRow + ' با موفقیت به‌روزرسانی شد.',
+        action: 'updated',
+        row: existingRow,
+        assetId: assetId,
+        sheetUrl: ss.getUrl()
+      });
+    } else {
+      // ۴. درج به عنوان ردیف جدید (Append / Force Append / New Version)
+      sheet.appendRow(rowValues);
+      var lastRow = sheet.getLastRow();
+
+      // اعمال فرمت زیبا بر ردیف جدید
+      sheet.getRange(lastRow, 1, 1, rowValues.length)
+        .setFontFamily('Inter')
+        .setFontSize(10)
+        .setVerticalAlignment('middle');
+
+      return responseJson({
+        status: 'success',
+        message: 'شناسنامه مستند ' + assetId + ' با موفقیت در گوگل شیت درج گردید.',
+        action: 'appended',
+        row: lastRow,
+        assetId: assetId,
+        sheetUrl: ss.getUrl()
+      });
+    }
+
+  } catch (err) {
+    return responseJson({
+      status: 'error',
+      message: 'POST Server Error: ' + err.toString()
+    });
+  }
+}
+
+/**
+ * دریافت یا ساخت شیت استاندارد با ۶۶ ستون (با جستجوی هوشمند بدون حساسیت به حروف کوچک/بزرگ و فواصل)
+ */
+function getOrCreateSheet(ss, targetSheetName) {
+  var targetName = (targetSheetName || SHEET_NAME || DEFAULT_SHEET_NAME || 'temp').trim();
+  var sheet = ss.getSheetByName(targetName);
+  if (!sheet) {
+    var allSheets = ss.getSheets();
+    for (var i = 0; i < allSheets.length; i++) {
+      if (allSheets[i].getName().trim().toLowerCase() === targetName.toLowerCase()) {
+        sheet = allSheets[i];
+        break;
+      }
+    }
+  }
+  if (!sheet) {
+    sheet = ss.insertSheet(targetName);
+    initSheetHeaders(sheet);
+  } else {
+    if (sheet.getLastRow() === 0) {
+      initSheetHeaders(sheet);
+    }
+  }
+  return sheet;
+}
+
+/**
+ * ایجاد هدرهای جدول و فرمت‌بندی رسمی با تم مدرن
+ */
+function initSheetHeaders(sheet) {
+  sheet.getRange(1, 1, 1, HEADERS.length)
+    .setValues([HEADERS])
+    .setBackground('#1A1C23')
+    .setFontColor('#FFFFFF')
+    .setFontWeight('bold')
+    .setFontFamily('Inter')
+    .setFontSize(10)
+    .setHorizontalAlignment('center')
+    .setVerticalAlignment('middle');
+
+  sheet.setFrozenRows(1);
+  sheet.setRowHeight(1, 42);
+}
+
+/**
+ * جستجوی ردیف اثر بر اساس asset_id در ستون اول
+ */
+function findRowByAssetId(sheet, assetId) {
+  if (!assetId) return 0;
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return 0;
+
+  var idColumn = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+  var cleanTarget = String(assetId).trim().toLowerCase();
+  for (var i = 0; i < idColumn.length; i++) {
+    if (String(idColumn[i][0]).trim().toLowerCase() === cleanTarget) {
+      return i + 2; // شماره سطر در شیت (ردیف اول هدر است)
+    }
+  }
+  return 0;
+}
+
+/**
+ * تبدیل هوشمند شیء JSON مستند به آرایه ۶۶ تایی دقیقاً منطبق بر تست 1.xlsx
+ */
+function buildRowFromPayload(d) {
+  var crew = d.crew || {};
+  var archival = d.archival_footage_log || {};
+  var interviewees = d.interviewees_with_timecodes || [];
+  var music = d.music_cues || [];
+
+  // ۱. فرمت‌بندی مصاحبه‌شوندگان با جداکننده || و ویژگی‌های |
+  var formattedInterviewees = '';
+  if (Array.isArray(interviewees) && interviewees.length > 0) {
+    var parts = [];
+    for (var i = 0; i < interviewees.length; i++) {
+      var it = interviewees[i];
+      parts.push(
+        'name: ' + (it.name || '') + ' | ' +
+        'role: ' + (it.role || '') + ' | ' +
+        'timecode_in: ' + (it.timecode_in || '') + ' | ' +
+        'timecode_out: ' + (it.timecode_out || '') + ' | ' +
+        'topic: ' + (it.topic || '')
+      );
+    }
+    formattedInterviewees = parts.join(' || ');
+  } else if (typeof interviewees === 'string') {
+    formattedInterviewees = interviewees;
+  }
+
+  // ۲. فرمت‌بندی نشانه‌های موسیقی با جداکننده || و ویژگی‌های |
+  var formattedMusic = '';
+  if (Array.isArray(music) && music.length > 0) {
+    var mParts = [];
+    for (var m = 0; m < music.length; m++) {
+      var mc = music[m];
+      mParts.push(
+        'timecode_in: ' + (mc.timecode_in || '') + ' | ' +
+        'timecode_out: ' + (mc.timecode_out || '') + ' | ' +
+        'type: ' + (mc.type || '')
+      );
+    }
+    formattedMusic = mParts.join(' || ');
+  } else if (typeof music === 'string') {
+    formattedMusic = music;
+  }
+
+  // ۳. فرمت‌بندی آرایه‌ها با کامای فارسی «، »
+  var geoLocs = Array.isArray(d.geographical_locations) ? d.geographical_locations.join('، ') : (d.geographical_locations || '');
+  var thematicTags = Array.isArray(d.thematic_tags) ? d.thematic_tags.join('، ') : (d.thematic_tags || '');
+  var keywords = Array.isArray(d.semantic_keywords) ? d.semantic_keywords.join('، ') : (d.semantic_keywords || '');
+  var languages = Array.isArray(d.languages_and_dialects) ? d.languages_and_dialects.join('، ') : (d.languages_and_dialects || '');
+
+  // ۴. نرمال‌سازی فیلد is_series
+  var isSeriesVal = 'خیر';
+  var rawSeries = String(d.is_series || '').toLowerCase().trim();
+  if (rawSeries === 'بله' || rawSeries === 'true' || rawSeries === 'yes') {
+    isSeriesVal = 'بله';
+  }
+
+  return [
+    d.asset_id !== undefined ? String(d.asset_id) : '',
+    d.title_extracted || '',
+    d.title_finglish || '',
+    d.international_title || '',
+    isSeriesVal,
+    d.episode_number || '',
+    d.logline || '',
+    d.short_synopsis || d.short_summary || '',
+    d.long_synopsis || d.full_summary || '',
+    d.technical_judicial_notes || '',
+    d.format_category || 'فیلم مستند',
+    d.main_topic || '',
+    d.sub_topic || '',
+    d.time_category || '',
+    d.duration_exact || '',
+    d.documentary_mode || '',
+    d.temporal_era || '',
+    d.symbols_and_motifs || '',
+    geoLocs,
+    d.main_protagonist_subject || '',
+    d.core_message || '',
+    d.subject_profession || '',
+    d.keyframe_timestamps_5frames || '',
+    crew.director || '',
+    crew.producer_individual || '',
+    crew.legal_producer_entity || '',
+    crew.executive_producer || '',
+    crew.screenwriter || '',
+    crew.researcher || '',
+    crew.cinematographer || '',
+    crew.camera_operator || '',
+    crew.sound_recordist || '',
+    crew.sound_designer || '',
+    crew.editor || '',
+    crew.music_composer || '',
+    crew.music_arranger || '',
+    crew.narrator || '',
+    crew.actors || '',
+    crew.production_manager || '',
+    crew.set_and_costume_designer || '',
+    crew.vfx_designer || '',
+    crew.title_and_graphic_designer || '',
+    crew.still_photographer || '',
+    crew.poet_lyricist || '',
+    crew.singer_vocalist || '',
+    crew.choral_group || '',
+    crew.animator || '',
+    crew.reporter || '',
+    formattedInterviewees,
+    archival.status || '',
+    archival.timecodes || '',
+    archival.source_evidence || '',
+    formattedMusic,
+    thematicTags,
+    keywords,
+    languages,
+    d.visual_qc || '',
+    d.audio_style || '',
+    d.content_advisory_and_warnings || '',
+    d.recommended_age_rating || 'عمومی (همه سنین)',
+    d.ammar_discourse_score !== undefined ? d.ammar_discourse_score : '',
+    d.ammar_discourse_reasons || '',
+    d.subtitles_srt || '',
+    d.confidence_score !== undefined ? d.confidence_score : '',
+    d.human_verification_status || 'در انتظار بررسی داوران',
+    d.system_review_flags || ''
+  ];
+}
+
+/**
+ * بازسازی شیء کامل JSON مستند از سطر شیت (بدون حذف یا اضافه شدن هیچ فیلدی)
+ */
+function buildPayloadFromRow(row, headers) {
+  var doc = {
+    crew: {},
+    archival_footage_log: {},
+    interviewees_with_timecodes: [],
+    music_cues: [],
+    geographical_locations: [],
+    thematic_tags: [],
+    semantic_keywords: [],
+    languages_and_dialects: []
+  };
+
+  var headerList = (headers && headers.length > 0) ? headers : HEADERS;
+  for (var i = 0; i < headerList.length; i++) {
+    var key = headerList[i] || HEADERS[i];
+    if (!key) continue;
+    var val = (i < row.length) ? row[i] : '';
+    if (val === null || val === undefined) val = '';
+
+    if (key.indexOf('crew.') === 0) {
+      var crewRole = key.substring(5);
+      doc.crew[crewRole] = String(val);
+    } else if (key.indexOf('archival_footage_log.') === 0) {
+      var archField = key.substring(21);
+      doc.archival_footage_log[archField] = String(val);
+    } else if (key === 'interviewees_with_timecodes') {
+      doc.interviewees_with_timecodes = parseDelimitedInterviewees(String(val));
+    } else if (key === 'music_cues') {
+      doc.music_cues = parseDelimitedMusic(String(val));
+    } else if (key === 'geographical_locations' || key === 'thematic_tags' || key === 'semantic_keywords' || key === 'languages_and_dialects') {
+      doc[key] = parseDelimitedArray(String(val));
+    } else if (key === 'ammar_discourse_score' || key === 'confidence_score') {
+      var num = parseFloat(val);
+      doc[key] = !isNaN(num) ? num : String(val);
+    } else {
+      doc[key] = String(val);
+    }
+  }
+
+  return doc;
+}
+
+/**
+ * پارس رشته مصاحبه‌ها به آرایه استاندارد اشیاء
+ */
+function parseDelimitedInterviewees(str) {
+  if (!str || !str.trim()) return [];
+  var items = str.split('||');
+  var result = [];
+
+  for (var i = 0; i < items.length; i++) {
+    var itemStr = items[i].trim();
+    if (!itemStr) continue;
+
+    var obj = { name: '', role: '', timecode_in: '', timecode_out: '', topic: '' };
+    var fields = itemStr.split('|');
+
+    for (var f = 0; f < fields.length; f++) {
+      var fld = fields[f].trim();
+      var colonIdx = fld.indexOf(':');
+      if (colonIdx > 0) {
+        var k = fld.substring(0, colonIdx).trim();
+        var v = fld.substring(colonIdx + 1).trim();
+        if (obj.hasOwnProperty(k)) {
+          obj[k] = v;
+        }
+      }
+    }
+    result.push(obj);
+  }
+  return result;
+}
+
+/**
+ * پارس رشته نشانه‌های موسیقی به آرایه استاندارد اشیاء
+ */
+function parseDelimitedMusic(str) {
+  if (!str || !str.trim()) return [];
+  var items = str.split('||');
+  var result = [];
+
+  for (var i = 0; i < items.length; i++) {
+    var itemStr = items[i].trim();
+    if (!itemStr) continue;
+
+    var obj = { timecode_in: '', timecode_out: '', type: '' };
+    var fields = itemStr.split('|');
+
+    for (var f = 0; f < fields.length; f++) {
+      var fld = fields[f].trim();
+      var colonIdx = fld.indexOf(':');
+      if (colonIdx > 0) {
+        var k = fld.substring(0, colonIdx).trim();
+        var v = fld.substring(colonIdx + 1).trim();
+        if (obj.hasOwnProperty(k)) {
+          obj[k] = v;
+        }
+      }
+    }
+    result.push(obj);
+  }
+  return result;
+}
+
+/**
+ * پارس آرایه‌های متنی با جداکننده‌های کامای فارسی «،» یا انگلیسی «,»
+ */
+function parseDelimitedArray(str) {
+  if (!str || !str.trim()) return [];
+  var raw = str.split(/[،,]/);
+  var clean = [];
+  for (var i = 0; i < raw.length; i++) {
+    var item = raw[i].trim();
+    if (item) clean.push(item);
+  }
+  return clean;
+}
+
+/**
+ * خروجی پاسخ با فرمت استاندارد JSON
+ */
+function responseJson(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}

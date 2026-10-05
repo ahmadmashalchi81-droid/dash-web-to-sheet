@@ -43,93 +43,93 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
   const verifiedPercent = count > 0 ? Math.round((verifiedCount / count) * 100) : 0;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 my-6" dir="rtl">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" dir="rtl">
       {/* کارت اول: تعداد کل آثار موجود */}
-      <div className="bg-white p-5 rounded-xl border border-neutral-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex items-center justify-between transition-shadow hover:shadow-md">
-        <div className="flex flex-col justify-center">
+      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:border-neutral-300 transition-all flex items-center justify-between min-h-[104px]">
+        <div className="flex flex-col justify-center min-w-0">
           <span className="text-xs font-medium text-neutral-500 block mb-1 whitespace-nowrap">
             تعداد کل آثار موجود
           </span>
-          <div className="flex items-baseline space-x-2 space-x-reverse whitespace-nowrap">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 whitespace-nowrap">
-              {count}
+          <div className="flex items-baseline space-x-1.5 space-x-reverse whitespace-nowrap">
+            <span className="text-2xl sm:text-[26px] font-extrabold tracking-tight text-neutral-900 tabular-nums font-mono leading-none">
+              {count.toLocaleString('fa-IR')}
             </span>
-            <span className="text-xs text-neutral-400 whitespace-nowrap">
+            <span className="text-xs text-neutral-500 font-medium mr-1">
               اثر ثبت‌شده
             </span>
           </div>
-          <span className="text-[11px] text-neutral-400 mt-1 block whitespace-nowrap">
+          <span className="text-[11px] text-neutral-400 mt-1 block truncate font-medium">
             مخزن فعال شیت
           </span>
         </div>
-        <div className="w-12 h-12 rounded-xl bg-neutral-100/80 flex items-center justify-center text-neutral-700 shrink-0">
-          <Film className="w-6 h-6 stroke-[1.5]" />
+        <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-700 shrink-0">
+          <Film className="w-5 h-5 stroke-[1.75]" />
         </div>
       </div>
 
       {/* کارت دوم: مجموع زمان کل مستندها */}
-      <div className="bg-white p-5 rounded-xl border border-neutral-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex items-center justify-between transition-shadow hover:shadow-md">
-        <div className="flex flex-col justify-center">
+      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:border-neutral-300 transition-all flex items-center justify-between min-h-[104px]">
+        <div className="flex flex-col justify-center min-w-0">
           <span className="text-xs font-medium text-neutral-500 block mb-1 whitespace-nowrap">
             مجموع زمان کل مستندها
           </span>
           <div className="whitespace-nowrap">
-            <span className="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 whitespace-nowrap">
+            <span className="text-xl sm:text-[22px] font-extrabold tracking-tight text-neutral-900 tabular-nums font-mono leading-none">
               {formattedDuration}
             </span>
           </div>
-          <span className="text-[11px] text-neutral-400 mt-1 block font-mono whitespace-nowrap" dir="rtl">
+          <span className="text-[11px] text-neutral-400 mt-1 block font-mono truncate font-medium" dir="rtl">
             {totalSeconds.toLocaleString('fa-IR')} ثانیه کل
           </span>
         </div>
-        <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-          <Clock className="w-6 h-6 stroke-[1.5]" />
+        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+          <Clock className="w-5 h-5 stroke-[1.75]" />
         </div>
       </div>
 
       {/* کارت سوم: میانگین گفتمان عمار */}
-      <div className="bg-white p-5 rounded-xl border border-neutral-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex items-center justify-between transition-shadow hover:shadow-md">
-        <div className="flex flex-col justify-center">
+      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:border-neutral-300 transition-all flex items-center justify-between min-h-[104px]">
+        <div className="flex flex-col justify-center min-w-0">
           <span className="text-xs font-medium text-neutral-500 block mb-1 whitespace-nowrap">
             میانگین گفتمان عمار
           </span>
           <div className="flex items-baseline space-x-1.5 space-x-reverse whitespace-nowrap">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 whitespace-nowrap">
+            <span className="text-2xl sm:text-[26px] font-extrabold tracking-tight text-neutral-900 tabular-nums font-mono leading-none">
               {avgScore}
             </span>
-            <span className="text-xs text-neutral-500 font-medium whitespace-nowrap">
+            <span className="text-xs text-neutral-500 font-medium mr-1">
               از ۱۰
             </span>
           </div>
-          <span className="text-[11px] text-neutral-400 mt-1 block whitespace-nowrap">
+          <span className="text-[11px] text-neutral-400 mt-1 block truncate font-medium">
             شاخص محتوایی جشنواره
           </span>
         </div>
-        <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-          <Award className="w-6 h-6 stroke-[1.5]" />
+        <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+          <Award className="w-5 h-5 stroke-[1.75]" />
         </div>
       </div>
 
       {/* کارت چهارم: وضعیت بررسی ناظران */}
-      <div className="bg-white p-5 rounded-xl border border-neutral-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex items-center justify-between transition-shadow hover:shadow-md">
-        <div className="flex flex-col justify-center">
+      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:border-neutral-300 transition-all flex items-center justify-between min-h-[104px]">
+        <div className="flex flex-col justify-center min-w-0">
           <span className="text-xs font-medium text-neutral-500 block mb-1 whitespace-nowrap">
             وضعیت بررسی ناظران
           </span>
           <div className="flex items-baseline space-x-1.5 space-x-reverse whitespace-nowrap">
-            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-[#10B981] whitespace-nowrap">
+            <span className="text-2xl sm:text-[26px] font-extrabold tracking-tight text-emerald-600 tabular-nums font-mono leading-none">
               {verifiedPercent}%
             </span>
-            <span className="text-xs font-semibold text-[#10B981] whitespace-nowrap">
+            <span className="text-xs font-semibold text-emerald-700 mr-1">
               تایید شده
             </span>
           </div>
-          <span className="text-[11px] text-neutral-400 mt-1 block whitespace-nowrap">
+          <span className="text-[11px] text-neutral-400 mt-1 block truncate font-medium">
             {verifiedCount} اثر تایید | {count - verifiedCount} در انتظار
           </span>
         </div>
-        <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-[#10B981] shrink-0">
-          <CheckCircle2 className="w-6 h-6 stroke-[1.5]" />
+        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+          <CheckCircle2 className="w-5 h-5 stroke-[1.75]" />
         </div>
       </div>
     </div>

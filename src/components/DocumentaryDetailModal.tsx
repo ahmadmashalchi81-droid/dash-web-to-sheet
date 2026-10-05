@@ -79,23 +79,23 @@ export const DocumentaryDetailModal: React.FC<DocumentaryDetailModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
       <div
-        className="bg-white w-full max-w-4xl rounded-2xl shadow-2xl border border-neutral-100 flex flex-col max-h-[90vh] overflow-hidden"
+        className="bg-white w-full max-w-4xl rounded-2xl shadow-xl border border-neutral-200/80 flex flex-col max-h-[90vh] overflow-hidden"
         dir="rtl"
       >
         {/* Top Header */}
-        <div className="p-4 sm:p-6 border-b border-neutral-100 flex items-start justify-between bg-neutral-50/50">
+        <div className="p-4 sm:p-6 border-b border-neutral-200/80 flex items-start justify-between bg-neutral-50/60">
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
-              <span className="font-mono text-xs font-semibold bg-neutral-900 text-white px-2.5 py-0.5 rounded">
+              <span className="font-mono text-xs font-semibold bg-neutral-900 text-white px-2.5 py-0.5 rounded-md">
                 {documentary.asset_id}
               </span>
-              <span className="text-xs bg-neutral-200/80 text-neutral-800 px-2 py-0.5 rounded font-medium">
+              <span className="text-xs bg-neutral-200/80 text-neutral-800 px-2.5 py-0.5 rounded-md font-medium">
                 {documentary.format_category || 'فیلم مستند'}
               </span>
-              <span className="text-xs bg-blue-50 text-blue-800 px-2 py-0.5 rounded font-medium">
+              <span className="text-xs bg-blue-50 text-blue-800 border border-blue-200/60 px-2.5 py-0.5 rounded-md font-medium">
                 مجموعه: {documentary.is_series === 'بله' ? `بله (${documentary.episode_number || 'قسمت نامشخص'})` : 'تک‌قسمتی (خیر)'}
               </span>
-              <span className="text-xs text-neutral-500 font-mono">
+              <span className="text-xs text-neutral-500 font-mono font-medium">
                 {documentary.duration_exact}
               </span>
             </div>
@@ -119,7 +119,7 @@ export const DocumentaryDetailModal: React.FC<DocumentaryDetailModalProps> = ({
           <div className="flex items-center space-x-2 space-x-reverse">
             <button
               onClick={handleCopyJson}
-              className="inline-flex items-center space-x-1.5 space-x-reverse px-3 py-1.5 text-xs font-medium bg-white border border-neutral-200 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors shadow-2xs"
+              className="inline-flex items-center space-x-1.5 space-x-reverse px-3 py-1.5 text-xs font-medium bg-white border border-neutral-200/90 text-neutral-700 rounded-xl hover:bg-neutral-50 transition-colors shadow-2xs"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-neutral-500" />}
               <span>{copied ? 'کپی شد' : 'کپی JSON استریکت'}</span>
@@ -127,7 +127,7 @@ export const DocumentaryDetailModal: React.FC<DocumentaryDetailModalProps> = ({
 
             <button
               onClick={onClose}
-              className="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-100 transition-colors"
+              className="w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>

@@ -9,8 +9,10 @@ import { DocumentaryDetailModal } from './components/DocumentaryDetailModal.tsx'
 import { GoogleSheetModal } from './components/GoogleSheetModal.tsx';
 import { ApiExplorerModal } from './components/ApiExplorerModal.tsx';
 import { SchemaValidatorModal } from './components/SchemaValidatorModal.tsx';
+import { JsonUploaderModal } from './components/JsonUploaderModal.tsx';
 import { DocumentaryMetadata, PaginationInfo, SheetConnectionConfig, ApiResponse, KpiMetrics } from './types/documentary.ts';
 import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { exportToCsv, exportToJson, exportToExcelXml } from './utils/exportUtils.ts';
 
 export default function App() {
   const [documentaries, setDocumentaries] = useState<DocumentaryMetadata[]>([]);
@@ -50,6 +52,7 @@ export default function App() {
   const [isSheetModalOpen, setIsSheetModalOpen] = useState<boolean>(false);
   const [isApiExplorerOpen, setIsApiExplorerOpen] = useState<boolean>(false);
   const [isValidatorOpen, setIsValidatorOpen] = useState<boolean>(false);
+  const [isUploaderOpen, setIsUploaderOpen] = useState<boolean>(false);
 
   // Notifications
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
@@ -143,13 +146,13 @@ export default function App() {
   }, [fetchDocumentaries]);
 
   // Trigger sync
-  const handleTriggerSync = async (customUrl?: string, mode?: 'live' | 'seed') => {
+  const handleTriggerSync = async (customUrl?: string, mode?: 'live' | 'seed', sheetName?: string) => {
     setIsSyncing(true);
     try {
       const res = await fetch('/api/v1/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ webAppUrl: customUrl, mode })
+        body: JSON.stringify({ webAppUrl: customUrl, mode, sheetName })
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -162,19 +165,19 @@ export default function App() {
       return data;
     } catch (err: any) {
       showToast(err.message || 'خطا در همگام‌سازی با گوگل شیت', 'error');
-      throw err;
+      return null;
     } finally {
       setIsSyncing(false);
     }
   };
 
   // Save config
-  const handleSaveConfig = async (webAppUrl: string, mode: 'live' | 'seed') => {
+  const handleSaveConfig = async (webAppUrl: string, mode: 'live' | 'seed', sheetName?: string) => {
     try {
       const res = await fetch('/api/v1/config', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ webAppUrl, mode })
+        body: JSON.stringify({ webAppUrl, mode, sheetName })
       });
       const data = await res.json();
       if (data.success) {
@@ -209,12 +212,42 @@ export default function App() {
     setSearch(tag);
   };
 
+  // Full-dataset export handler per Phase 8 Roadmap
+  const handleExport = (format: 'excel' | 'csv' | 'json') => {
+    try {
+      const params = new URLSearchParams();
+      params.set('format', format);
+      if (debouncedSearch) params.set('q', debouncedSearch);
+      if (selectedTopic !== 'all') params.set('topic', selectedTopic);
+      if (selectedFormat !== 'all') params.set('format_category', selectedFormat);
+      if (selectedTemporalEra !== 'all') params.set('temporal_era', selectedTemporalEra);
+      if (selectedVerification !== 'all') params.set('verification', selectedVerification);
+      if (selectedIsSeries !== 'all') params.set('is_series', selectedIsSeries);
+      if (selectedTimeCategory !== 'all') params.set('time_category', selectedTimeCategory);
+
+      const exportUrl = `/api/v1/export?${params.toString()}`;
+      const a = document.createElement('a');
+      a.href = exportUrl;
+      const fileExt = format === 'excel' ? 'xls' : format;
+      a.download = `documentaries-export-66cols.${fileExt}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast(`درخواست دانلود خروجی ${format.toUpperCase()} با موفقیت ارسال شد.`, 'success');
+    } catch {
+      // Fallback to client-side page export
+      if (format === 'excel') exportToExcelXml(documentaries, undefined, config?.sheetName || 'temp');
+      else if (format === 'csv') exportToCsv(documentaries);
+      else exportToJson(documentaries);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-neutral-900 flex flex-col selection:bg-black selection:text-white">
       {/* Toast */}
       {toast && (
         <div
-          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl shadow-lg border text-xs sm:text-sm font-medium flex items-center space-x-2 space-x-reverse transition-all animate-in fade-in slide-in-from-top-3 ${
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl shadow-xl border text-xs sm:text-sm font-medium flex items-center space-x-2 space-x-reverse transition-all animate-in fade-in slide-in-from-top-3 ${
             toast.type === 'success'
               ? 'bg-neutral-900 text-white border-neutral-800'
               : 'bg-red-600 text-white border-red-700'
@@ -236,13 +269,14 @@ export default function App() {
         onOpenSheetModal={() => setIsSheetModalOpen(true)}
         onOpenApiExplorer={() => setIsApiExplorerOpen(true)}
         onOpenValidator={() => setIsValidatorOpen(true)}
-        onSync={() => handleTriggerSync(config?.webAppUrl, config?.mode)}
+        onOpenUploader={() => setIsUploaderOpen(true)}
+        onSync={() => handleTriggerSync(config?.webAppUrl, config?.mode, config?.sheetName)}
         isSyncing={isSyncing}
         totalRecords={kpiMetrics?.totalRecords ?? pagination.total}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
         {/* Section 4: KPI Cards (Formula-equipped) */}
         <StatsOverview
           documentaries={documentaries}
@@ -276,11 +310,14 @@ export default function App() {
           topicsList={allTopics}
           formatsList={allFormats}
           erasList={allEras}
+          onExportExcel={() => handleExport('excel')}
+          onExportCsv={() => handleExport('csv')}
+          onExportJson={() => handleExport('json')}
         />
 
         {/* Loading Spinner or View */}
         {loading ? (
-          <div className="bg-white rounded-xl p-16 text-center border border-neutral-100 shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col items-center justify-center">
+          <div className="bg-white rounded-2xl p-16 text-center border border-neutral-200/80 shadow-2xs flex flex-col items-center justify-center">
             <Loader2 className="w-6 h-6 text-neutral-400 animate-spin mb-3" />
             <p className="text-xs text-neutral-500 font-medium">در حال واکشی متادیتا از سرویس پشتیبان...</p>
           </div>
@@ -332,6 +369,16 @@ export default function App() {
       <SchemaValidatorModal
         isOpen={isValidatorOpen}
         onClose={() => setIsValidatorOpen(false)}
+      />
+
+      <JsonUploaderModal
+        isOpen={isUploaderOpen}
+        onClose={() => setIsUploaderOpen(false)}
+        onSuccess={(msg) => showToast(msg, 'success')}
+        existingDocumentaries={documentaries}
+        onDocumentaryAdded={async () => {
+          await fetchDocumentaries(1);
+        }}
       />
 
       {/* Minimal Footer */}
