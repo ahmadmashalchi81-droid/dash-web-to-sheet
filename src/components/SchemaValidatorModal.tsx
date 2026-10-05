@@ -94,16 +94,16 @@ export const SchemaValidatorModal: React.FC<SchemaValidatorModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/45 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
       <div
-        className="bg-white w-full max-w-4xl rounded-2xl shadow-xl border border-neutral-200/80 flex flex-col max-h-[90vh] overflow-hidden"
+        className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl border border-neutral-200/80 flex flex-col max-h-[90vh] overflow-hidden"
         dir="rtl"
       >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-neutral-200/80 flex items-center justify-between bg-neutral-50/60">
-          <div className="flex items-center space-x-2.5 space-x-reverse">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center">
-              <CheckCircle className="w-4 h-4" />
+          <div className="flex items-center gap-3">
+            <div className="w-9.5 h-9.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center shadow-2xs">
+              <CheckCircle className="w-4.5 h-4.5" />
             </div>
             <div>
               <h3 className="text-base font-bold text-neutral-900">
@@ -117,7 +117,8 @@ export const SchemaValidatorModal: React.FC<SchemaValidatorModalProps> = ({
 
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors active:scale-95"
+            aria-label="بستن"
           >
             <X className="w-5 h-5" />
           </button>
@@ -132,7 +133,7 @@ export const SchemaValidatorModal: React.FC<SchemaValidatorModalProps> = ({
               </label>
               <button
                 onClick={handleValidate}
-                className="inline-flex items-center space-x-1 space-x-reverse px-3 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors shadow-xs"
+                className="h-9 inline-flex items-center gap-1.5 px-3.5 text-xs font-semibold bg-black text-white rounded-xl hover:bg-neutral-800 transition-all shadow-xs select-none active:scale-95"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
                 <span>بررسی و اعتبارسنجی</span>
@@ -142,7 +143,7 @@ export const SchemaValidatorModal: React.FC<SchemaValidatorModalProps> = ({
               value={inputJson}
               onChange={(e) => setInputJson(e.target.value)}
               rows={9}
-              className="w-full p-3 text-xs font-mono bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:bg-white transition-all leading-relaxed"
+              className="w-full p-3.5 text-xs font-mono bg-neutral-50/80 hover:bg-neutral-50 border border-neutral-200 rounded-2xl text-neutral-900 focus:outline-none focus:ring-1 focus:ring-black focus:bg-white transition-all leading-relaxed"
               dir="ltr"
             />
           </div>
@@ -177,7 +178,7 @@ export const SchemaValidatorModal: React.FC<SchemaValidatorModalProps> = ({
                   </span>
                 </div>
                 {result.warnings.length > 0 && (
-                  <span className="text-[11px] font-normal text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded">
+                  <span className="text-[11px] font-normal text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200/70">
                     {result.warnings.length} هشدار نرمال‌سازی
                   </span>
                 )}
@@ -202,7 +203,7 @@ export const SchemaValidatorModal: React.FC<SchemaValidatorModalProps> = ({
                   خروجی پاکسازی‌شده با پر کردن خودکار مقادیر خالی (""):
                 </span>
                 <pre
-                  className="bg-neutral-900 text-neutral-100 p-4 rounded-xl text-xs font-mono overflow-x-auto max-h-[250px] leading-relaxed select-all"
+                  className="bg-neutral-900 text-neutral-100 p-4 rounded-2xl text-xs font-mono overflow-x-auto max-h-[250px] leading-relaxed select-all"
                   dir="ltr"
                 >
                   {JSON.stringify(result.sanitizedData, null, 2)}
@@ -216,7 +217,7 @@ export const SchemaValidatorModal: React.FC<SchemaValidatorModalProps> = ({
         <div className="p-4 border-t border-neutral-100 bg-neutral-50/50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+            className="h-9 px-4 text-xs font-medium text-neutral-700 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors shadow-2xs active:scale-95"
           >
             بستن
           </button>
@@ -225,3 +226,4 @@ export const SchemaValidatorModal: React.FC<SchemaValidatorModalProps> = ({
     </div>
   );
 };
+

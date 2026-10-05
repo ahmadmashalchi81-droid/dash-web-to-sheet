@@ -617,13 +617,13 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
       {/* ========================================================================= */}
       {isDiffOpen && existingDoc && previewDoc ? (
         <div
-          className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-neutral-200 flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+          className="bg-white w-full max-w-5xl rounded-3xl shadow-2xl border border-neutral-200/80 flex flex-col max-h-[92vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200"
           dir="rtl"
         >
           {/* Diff Header */}
-          <div className="p-4 sm:p-5 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/80">
-            <div className="flex items-center space-x-2.5 space-x-reverse">
-              <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
+          <div className="p-4 sm:p-5 border-b border-neutral-200/80 flex items-center justify-between bg-neutral-50/80">
+            <div className="flex items-center gap-3">
+              <div className="w-9.5 h-9.5 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-xs">
                 <GitCompare className="w-5 h-5" />
               </div>
               <div>
@@ -631,7 +631,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
                   <h3 className="text-base font-bold text-neutral-900">
                     مقایسه تطبیقی فیلدها (Side-by-Side Diff)
                   </h3>
-                  <span className="font-mono text-xs font-bold bg-neutral-200 text-neutral-800 px-2 py-0.5 rounded">
+                  <span className="font-mono text-xs font-bold bg-neutral-200 text-neutral-800 px-2 py-0.5 rounded-lg">
                     {previewDoc.asset_id}
                   </span>
                 </div>
@@ -641,7 +641,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center space-x-2 space-x-reverse">
+            <div className="flex items-center gap-2">
               <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-amber-100 text-amber-800">
                 {diffStats.changed} فیلد دارای تفاوت
               </span>
@@ -650,8 +650,9 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
               </span>
               <button
                 onClick={() => setIsDiffOpen(false)}
-                className="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-200/60 transition-colors"
+                className="w-9 h-9 flex items-center justify-center text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-200/60 transition-colors active:scale-95"
                 title="بازگشت به نمای اصلی آپلود"
+                aria-label="بازگشت"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -660,10 +661,10 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
 
           {/* Diff Filter Bar */}
           <div className="px-5 py-2.5 bg-neutral-100/60 border-b border-neutral-200/60 flex items-center justify-between text-xs">
-            <div className="flex items-center space-x-2 space-x-reverse">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setDiffOnlyChanges(false)}
-                className={`px-3 py-1 rounded-md transition-colors font-medium ${
+                className={`px-3 py-1.5 rounded-lg transition-colors font-medium ${
                   !diffOnlyChanges
                     ? 'bg-white text-neutral-900 shadow-2xs font-semibold'
                     : 'text-neutral-600 hover:text-black'
@@ -673,7 +674,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
               </button>
               <button
                 onClick={() => setDiffOnlyChanges(true)}
-                className={`px-3 py-1 rounded-md transition-colors font-medium ${
+                className={`px-3 py-1.5 rounded-lg transition-colors font-medium ${
                   diffOnlyChanges
                     ? 'bg-amber-500 text-white shadow-2xs font-semibold'
                     : 'text-neutral-600 hover:text-black'
@@ -767,10 +768,10 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
           </div>
 
           {/* Diff Action Footer with Direct Execution */}
-          <div className="p-4 border-t border-neutral-100 bg-neutral-50/70 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="p-4 sm:px-6 border-t border-neutral-200/80 bg-neutral-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
             <button
               onClick={() => setIsDiffOpen(false)}
-              className="w-full sm:w-auto px-4 py-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors"
+              className="w-full sm:w-auto h-9 px-4 text-xs font-medium text-neutral-700 bg-white border border-neutral-300 rounded-xl hover:bg-neutral-50 transition-colors"
             >
               بازگشت به پنجره آپلود
             </button>
@@ -779,7 +780,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
               <button
                 onClick={() => handleSendToSheet('append')}
                 disabled={isSubmitting}
-                className="px-3 py-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors flex items-center gap-1.5"
+                className="h-9 px-3.5 text-xs font-medium text-neutral-700 bg-white border border-neutral-300 rounded-xl hover:bg-neutral-50 transition-colors flex items-center gap-1.5"
                 title="ثبت به عنوان ردیف جدید با حفظ کد قبلی"
               >
                 <PlusCircle className="w-3.5 h-3.5 text-neutral-500" />
@@ -789,7 +790,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
               <button
                 onClick={() => handleSendToSheet('new_version')}
                 disabled={isSubmitting}
-                className="px-3.5 py-2 text-xs font-semibold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 border border-emerald-200 rounded-lg transition-colors flex items-center gap-1.5"
+                className="h-9 px-3.5 text-xs font-semibold text-emerald-800 bg-emerald-100 hover:bg-emerald-200 border border-emerald-200 rounded-xl transition-colors flex items-center gap-1.5"
                 title="ثبت با شناسه نسخه جدید بدون تداخل"
               >
                 <Copy className="w-3.5 h-3.5" />
@@ -799,7 +800,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
               <button
                 onClick={() => handleSendToSheet('update')}
                 disabled={isSubmitting}
-                className="px-4 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                className="h-9 px-4 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-xs transition-colors flex items-center gap-1.5 active:scale-95"
                 title="جایگزینی متادیتای ردیف قبلی"
               >
                 {isSubmitting ? (
@@ -817,14 +818,14 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
         /* 2. MAIN UPLOADER MODAL & ADVANCED DUPLICATE RESOLUTION HUB               */
         /* ========================================================================= */
         <div
-          className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-neutral-100 flex flex-col max-h-[92vh] overflow-hidden"
+          className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-neutral-200/80 flex flex-col max-h-[92vh] overflow-hidden"
           dir="rtl"
         >
           {/* Header */}
-          <div className="p-4 sm:p-5 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
-            <div className="flex items-center space-x-2.5 space-x-reverse">
-              <div className="w-8 h-8 rounded-lg bg-black text-white flex items-center justify-center shadow-xs">
-                <Upload className="w-4 h-4" />
+          <div className="p-4 sm:p-5 border-b border-neutral-200/80 flex items-center justify-between bg-neutral-50/50">
+            <div className="flex items-center gap-3">
+              <div className="w-9.5 h-9.5 rounded-xl bg-black text-white flex items-center justify-center shadow-xs shrink-0">
+                <Upload className="w-4.5 h-4.5" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-neutral-900">
@@ -838,7 +839,8 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
 
             <button
               onClick={handleClose}
-              className="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-100 transition-colors"
+              className="w-9 h-9 flex items-center justify-center text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors active:scale-95"
+              aria-label="بستن"
             >
               <X className="w-5 h-5" />
             </button>
@@ -901,7 +903,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
                       e.stopPropagation();
                       handleLoadSample();
                     }}
-                    className="mt-1 inline-flex items-center space-x-1.5 space-x-reverse text-xs text-neutral-600 hover:text-black bg-white border border-neutral-200 px-3 py-1.5 rounded-lg shadow-2xs hover:bg-neutral-50 transition-colors"
+                    className="mt-1 inline-flex items-center gap-1.5 text-xs text-neutral-600 hover:text-black bg-white border border-neutral-200 px-3 py-1.5 rounded-lg shadow-2xs hover:bg-neutral-50 transition-colors active:scale-95"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                     <span>تست با فایل نمونه (آب رسان - کد 1504595)</span>
@@ -940,7 +942,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
                     <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0" />
                     <span>کد اثر تکراری شناسایی شد (شناسه: {existingDoc.asset_id})</span>
                   </div>
-                  <span className="px-2 py-0.5 bg-amber-200 text-amber-900 font-semibold text-[11px] rounded-md shrink-0">
+                  <span className="px-2.5 py-0.5 bg-amber-200 text-amber-900 font-semibold text-[11px] rounded-lg shrink-0">
                     نیاز به تصمیم‌گیری
                   </span>
                 </div>
@@ -974,7 +976,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
                         <Copy className="w-4 h-4 text-emerald-600" />
                         <span>تولید خودکار شناسه جدید (نسخه‌گذاری)</span>
                       </div>
-                      <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium border border-emerald-200">
+                      <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg font-medium border border-emerald-200">
                         پیشنهادی و امن
                       </span>
                     </div>
@@ -990,7 +992,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
                           value={newVersionId}
                           onChange={(e) => setNewVersionId(e.target.value.trim())}
                           placeholder="مثلاً 1504595-v2"
-                          className="w-full px-3 py-1.5 font-mono text-xs text-neutral-900 bg-neutral-50 border border-neutral-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:bg-white text-left dir-ltr"
+                          className="w-full h-9 px-3 font-mono text-xs text-neutral-900 bg-neutral-50 border border-neutral-300 rounded-xl focus:outline-none focus:border-emerald-600 focus:bg-white text-left dir-ltr"
                         />
                       </div>
 
@@ -998,7 +1000,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
                         <button
                           type="button"
                           onClick={() => setNewVersionId(generateVersionId(existingDoc.asset_id, 'v2'))}
-                          className="px-2 py-1 text-[11px] font-mono bg-neutral-100 hover:bg-neutral-200 rounded text-neutral-700 transition-colors"
+                          className="h-9 px-2.5 text-[11px] font-mono bg-neutral-100 hover:bg-neutral-200 rounded-xl text-neutral-700 transition-colors active:scale-95"
                           title="پسوند نسخه ۲"
                         >
                           v2
@@ -1006,7 +1008,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
                         <button
                           type="button"
                           onClick={() => setNewVersionId(generateVersionId(existingDoc.asset_id, 'rev1'))}
-                          className="px-2 py-1 text-[11px] font-mono bg-neutral-100 hover:bg-neutral-200 rounded text-neutral-700 transition-colors"
+                          className="h-9 px-2.5 text-[11px] font-mono bg-neutral-100 hover:bg-neutral-200 rounded-xl text-neutral-700 transition-colors active:scale-95"
                           title="پسوند ویرایش ۱"
                         >
                           rev1
@@ -1015,7 +1017,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
                           type="button"
                           onClick={() => handleSendToSheet('new_version')}
                           disabled={isSubmitting || !newVersionId}
-                          className="px-3 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-2xs transition-colors flex items-center justify-center gap-1 whitespace-nowrap active:scale-95"
+                          className="h-9 px-3.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-2xs transition-colors flex items-center justify-center gap-1 whitespace-nowrap active:scale-95"
                         >
                           <Check className="w-3.5 h-3.5" />
                           <span>ثبت نسخه جدید</span>
@@ -1038,7 +1040,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsDiffOpen(true)}
-                      className="px-3.5 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 active:scale-95 shrink-0"
+                      className="h-9 px-3.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-2xs transition-colors flex items-center gap-1.5 active:scale-95 shrink-0"
                     >
                       <GitCompare className="w-3.5 h-3.5" />
                       <span>مشاهده تفاوت‌ها</span>
@@ -1052,13 +1054,13 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
             {previewDoc && (
               <div className="border border-neutral-200 rounded-xl p-4 bg-neutral-50/60 space-y-3">
                 <div className="flex items-center justify-between border-b border-neutral-200/70 pb-2.5">
-                  <div className="flex items-center space-x-2 space-x-reverse">
+                  <div className="flex items-center gap-2">
                     <Film className="w-4 h-4 text-neutral-700" />
                     <span className="text-xs font-bold text-neutral-900">
                       مشخصات استخراج‌شده از JSON (مطابق ۶۶ ستون استاندارد):
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-semibold">
+                  <span className="text-[11px] font-mono bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-lg font-semibold">
                     اسکیما معتبر است
                   </span>
                 </div>
@@ -1118,24 +1120,24 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
           </div>
 
           {/* Modal Footer / Actions (Option 1, 2, 5) */}
-          <div className="p-4 border-t border-neutral-100 bg-neutral-50/50 flex flex-col sm:flex-row items-center justify-between gap-2.5">
+          <div className="p-4 sm:px-6 border-t border-neutral-200/80 bg-neutral-50/50 flex flex-col sm:flex-row items-center justify-between gap-3">
             {/* Option 5: Cancel */}
             <button
               onClick={handleClose}
               disabled={isSubmitting}
-              className="w-full sm:w-auto px-4 py-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+              className="w-full sm:w-auto h-9 px-4 text-xs font-medium text-neutral-700 bg-white border border-neutral-300 rounded-xl hover:bg-neutral-50 transition-colors active:scale-95"
             >
               انصراف و لغو
             </button>
 
-            <div className="flex flex-wrap items-center space-x-2 space-x-reverse w-full sm:w-auto justify-end gap-1.5">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
               {isDuplicate ? (
                 <>
                   {/* Option 2: Force Append */}
                   <button
                     onClick={() => handleSendToSheet('append')}
                     disabled={isSubmitting || !validation?.isValid}
-                    className="px-3 py-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-300 rounded-lg hover:bg-neutral-50 transition-colors flex items-center gap-1"
+                    className="h-9 px-3.5 text-xs font-medium text-neutral-700 bg-white border border-neutral-300 rounded-xl hover:bg-neutral-50 transition-colors flex items-center gap-1.5 active:scale-95"
                     title="ثبت به عنوان ردیف جدید با همان کد شناسنامه"
                   >
                     <PlusCircle className="w-3.5 h-3.5 text-neutral-500" />
@@ -1146,7 +1148,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
                   <button
                     onClick={() => handleSendToSheet('update')}
                     disabled={isSubmitting || !validation?.isValid}
-                    className="px-4 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm transition-colors flex items-center space-x-1.5 space-x-reverse active:scale-95"
+                    className="h-9 px-4 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow-xs transition-colors flex items-center gap-1.5 active:scale-95"
                     title="جایگزینی مقادیر ردیف قبلی با متادیتای جدید"
                   >
                     {isSubmitting ? (
@@ -1161,7 +1163,7 @@ export const JsonUploaderModal: React.FC<JsonUploaderModalProps> = ({
                 <button
                   onClick={() => handleSendToSheet('append')}
                   disabled={isSubmitting || !validation?.isValid}
-                  className="w-full sm:w-auto px-5 py-2 text-xs font-semibold text-white bg-black hover:bg-neutral-800 disabled:opacity-50 rounded-lg shadow-sm transition-all flex items-center justify-center space-x-1.5 space-x-reverse active:scale-95"
+                  className="w-full sm:w-auto h-10 px-5 text-xs font-semibold text-white bg-black hover:bg-neutral-800 disabled:opacity-50 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 active:scale-95"
                 >
                   {isSubmitting ? (
                     <>

@@ -88,16 +88,16 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/45 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
       <div
-        className="bg-white w-full max-w-2xl rounded-2xl shadow-xl border border-neutral-200/80 flex flex-col max-h-[90vh] overflow-hidden"
+        className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-neutral-200/80 flex flex-col max-h-[90vh] overflow-hidden"
         dir="rtl"
       >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-neutral-200/80 flex items-center justify-between bg-neutral-50/60">
-          <div className="flex items-center space-x-2.5 space-x-reverse">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center">
-              <Database className="w-4 h-4" />
+          <div className="flex items-center space-x-3 space-x-reverse">
+            <div className="w-9.5 h-9.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center shadow-2xs">
+              <Database className="w-4.5 h-4.5" />
             </div>
             <div>
               <h3 className="text-base font-bold text-neutral-900">
@@ -111,34 +111,41 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
 
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors active:scale-95"
+            aria-label="بستن"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-neutral-200/80 px-4 sm:px-6 bg-white text-xs sm:text-sm">
+        {/* MD3 Secondary Tabs */}
+        <div className="flex border-b border-neutral-200/80 px-4 sm:px-6 bg-white gap-2 text-xs sm:text-sm">
           <button
             onClick={() => setActiveTab('connect')}
-            className={`py-3 px-3 font-medium border-b-2 transition-colors ${
+            className={`relative py-3.5 px-3 font-semibold transition-colors flex items-center gap-1.5 ${
               activeTab === 'connect'
-                ? 'border-neutral-900 text-neutral-900'
-                : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                ? 'text-neutral-900'
+                : 'text-neutral-500 hover:text-neutral-900'
             }`}
           >
-            اتصال آدرس Web App
+            <span>اتصال آدرس Web App</span>
+            {activeTab === 'connect' && (
+              <span className="absolute bottom-0 inset-x-0 h-0.5 bg-neutral-900 rounded-full" />
+            )}
           </button>
           <button
             onClick={() => setActiveTab('script')}
-            className={`py-3 px-3 font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
+            className={`relative py-3.5 px-3 font-semibold transition-colors flex items-center gap-1.5 ${
               activeTab === 'script'
-                ? 'border-neutral-900 text-neutral-900'
-                : 'border-transparent text-neutral-500 hover:text-neutral-900'
+                ? 'text-neutral-900'
+                : 'text-neutral-500 hover:text-neutral-900'
             }`}
           >
             <FileCode className="w-4 h-4" />
             <span>کد Apps Script شیت</span>
+            {activeTab === 'script' && (
+              <span className="absolute bottom-0 inset-x-0 h-0.5 bg-neutral-900 rounded-full" />
+            )}
           </button>
         </div>
 
@@ -152,7 +159,7 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
                     آدرس Google Apps Script Web App یا اندپوینت شیت
                   </label>
                   {config?.webAppUrl && (
-                    <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200/70">
                       بارگذاری شده از Secrets (WEB_APP_URL)
                     </span>
                   )}
@@ -162,7 +169,7 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
                   value={urlInput}
                   onChange={(e) => setUrlInput(e.target.value)}
                   placeholder="https://script.google.com/macros/s/.../exec"
-                  className="w-full px-3 py-2 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:bg-white transition-all font-mono"
+                  className="w-full h-10 px-3 text-xs sm:text-sm bg-neutral-50/80 hover:bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 focus:outline-none focus:ring-1 focus:ring-black focus:bg-white transition-all font-mono"
                   dir="ltr"
                 />
                 <p className="text-[11px] text-neutral-500 mt-1.5 leading-relaxed">
@@ -175,7 +182,7 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
                   <label className="block text-xs font-semibold text-neutral-700">
                     نام برگه (تب) فعال در گوگل‌شیت
                   </label>
-                  <span className="text-[11px] font-medium text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                  <span className="text-[11px] font-medium text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-lg border border-blue-200/70">
                     برگه تست: temp
                   </span>
                 </div>
@@ -184,18 +191,18 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
                   value={sheetNameInput}
                   onChange={(e) => setSheetNameInput(e.target.value)}
                   placeholder="temp یا کلیدهای_اصلی_JSON"
-                  className="w-full px-3 py-2 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:bg-white transition-all font-mono"
+                  className="w-full h-10 px-3 text-xs sm:text-sm bg-neutral-50/80 hover:bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 focus:outline-none focus:ring-1 focus:ring-black focus:bg-white transition-all font-mono"
                   dir="ltr"
                 />
                 <p className="text-[11px] text-neutral-500 mt-1.5 leading-relaxed">
-                  برگه نمونه پیش‌فرض <code className="bg-neutral-100 text-neutral-800 px-1 py-0.5 rounded font-mono">temp</code> در شیت «تمرین ۱» شامل ۱۰۰۰ رکورد آزمایشی است. پس از تست می‌توانید نام تب را تغییر دهید.
+                  برگه نمونه پیش‌فرض <code className="bg-neutral-100 text-neutral-800 px-1.5 py-0.5 rounded font-mono">temp</code> در شیت «تمرین ۱» شامل ۱۰۰۰ رکورد آزمایشی است. پس از تست می‌توانید نام تب را تغییر دهید.
                 </p>
               </div>
 
               {/* Status & Feedback */}
               {testResult && (
                 <div
-                  className={`p-3.5 rounded-xl border flex items-start space-x-2 space-x-reverse text-xs leading-relaxed ${
+                  className={`p-3.5 rounded-xl border flex items-start gap-2.5 text-xs leading-relaxed ${
                     testResult.success
                       ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
                       : 'bg-red-50 border-red-200 text-red-900'
@@ -215,7 +222,7 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
                 <button
                   onClick={() => handleTestAndSave('live')}
                   disabled={isTesting}
-                  className="flex-1 inline-flex items-center justify-center space-x-1.5 space-x-reverse px-4 py-2.5 rounded-lg text-xs font-semibold text-white bg-neutral-900 hover:bg-neutral-800 disabled:opacity-50 transition-colors shadow-xs"
+                  className="flex-1 h-10 inline-flex items-center justify-center gap-1.5 px-4 rounded-xl text-xs font-semibold text-white bg-black hover:bg-neutral-800 disabled:opacity-50 transition-all shadow-xs select-none active:scale-95"
                 >
                   <RefreshCw className={`w-3.5 h-3.5 ${isTesting ? 'animate-spin' : ''}`} />
                   <span>{isTesting ? 'در حال تست و اتصال...' : 'اتصال و سینک شیت زنده'}</span>
@@ -224,7 +231,7 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
                 <button
                   onClick={() => handleTestAndSave('seed')}
                   disabled={isTesting}
-                  className="px-4 py-2.5 rounded-lg text-xs font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 transition-colors"
+                  className="h-10 px-4 rounded-xl text-xs font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200/80 transition-all select-none active:scale-95"
                 >
                   بازنشانی به داده‌های آزمایشی استاندارد
                 </button>
@@ -254,9 +261,9 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
                 </p>
                 <button
                   onClick={handleCopyScript}
-                  className="inline-flex items-center space-x-1 space-x-reverse text-xs bg-neutral-900 text-white px-3 py-1.5 rounded-lg hover:bg-neutral-800 transition-colors"
+                  className="h-9 inline-flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 text-white px-3 rounded-xl hover:bg-neutral-800 transition-colors shadow-xs select-none active:scale-95"
                 >
-                  {copiedScript ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedScript ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copiedScript ? 'کپی شد' : 'کپی اسکریپت'}</span>
                 </button>
               </div>
@@ -275,7 +282,7 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
         <div className="p-4 border-t border-neutral-100 bg-neutral-50/50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+            className="h-9 px-4 text-xs font-medium text-neutral-700 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors shadow-2xs active:scale-95"
           >
             بستن
           </button>
@@ -284,3 +291,4 @@ export const GoogleSheetModal: React.FC<GoogleSheetModalProps> = ({
     </div>
   );
 };
+

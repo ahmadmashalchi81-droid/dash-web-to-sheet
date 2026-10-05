@@ -11,7 +11,7 @@ import { ApiExplorerModal } from './components/ApiExplorerModal.tsx';
 import { SchemaValidatorModal } from './components/SchemaValidatorModal.tsx';
 import { JsonUploaderModal } from './components/JsonUploaderModal.tsx';
 import { DocumentaryMetadata, PaginationInfo, SheetConnectionConfig, ApiResponse, KpiMetrics } from './types/documentary.ts';
-import { AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, CheckCircle, Loader2, Clock, Database } from 'lucide-react';
 import { exportToCsv, exportToJson, exportToExcelXml } from './utils/exportUtils.ts';
 
 export default function App() {
@@ -244,7 +244,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-neutral-900 flex flex-col selection:bg-black selection:text-white">
-      {/* Toast */}
+      {/* Toast Notification (MD3 Snackbar) */}
       {toast && (
         <div
           className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-2xl shadow-xl border text-xs sm:text-sm font-medium flex items-center space-x-2 space-x-reverse transition-all animate-in fade-in slide-in-from-top-3 ${
@@ -255,9 +255,9 @@ export default function App() {
           dir="rtl"
         >
           {toast.type === 'success' ? (
-            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
           ) : (
-            <AlertCircle className="w-4 h-4 text-white" />
+            <AlertCircle className="w-4 h-4 text-white shrink-0" />
           )}
           <span>{toast.message}</span>
         </div>
@@ -275,9 +275,34 @@ export default function App() {
         totalRecords={kpiMetrics?.totalRecords ?? pagination.total}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5">
-        {/* Section 4: KPI Cards (Formula-equipped) */}
+      {/* Main Content Area with MD3 Grid & Spacing System */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* MD3 Page Context Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-0.5" dir="rtl">
+          <div>
+            <h2 className="text-lg sm:text-xl font-extrabold text-neutral-900 tracking-tight">
+              میز کار و تحلیل فراداده‌های مستند
+            </h2>
+            <p className="text-xs text-neutral-500 mt-0.5 font-normal">
+              پایش بلادرنگ ۶۶ ستون متادیتای ساخت‌یافته و همگام با برگه «{config?.sheetName || 'temp'}»
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs self-start sm:self-auto">
+            {lastSyncTime && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-neutral-200/80 rounded-xl text-neutral-600 shadow-2xs font-mono text-[11px]">
+                <Clock className="w-3.5 h-3.5 text-neutral-400" />
+                <span>سینک: {new Date(lastSyncTime).toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-100 border border-neutral-200/80 rounded-xl text-neutral-700 font-medium text-[11px]">
+              <Database className="w-3.5 h-3.5 text-neutral-500" />
+              <span>{dataSource === 'mock_sheets_seed' ? 'داده‌های اولیه (Seed)' : 'گوگل‌شیت زنده (Live)'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 1: KPI Summary Metrics (MD3 Outlined Cards) */}
         <StatsOverview
           documentaries={documentaries}
           totalRecords={pagination.total}
@@ -286,7 +311,7 @@ export default function App() {
           kpiMetrics={kpiMetrics}
         />
 
-        {/* Query Toolbar with Section 1 & Phase 4 Advanced Filters */}
+        {/* Section 2: Data Controls & Filters Toolbar */}
         <QueryToolbar
           search={search}
           onSearchChange={setSearch}
@@ -315,11 +340,12 @@ export default function App() {
           onExportJson={() => handleExport('json')}
         />
 
-        {/* Loading Spinner or View */}
+        {/* Section 3: Data Visualization / Table & Cards View */}
         {loading ? (
           <div className="bg-white rounded-2xl p-16 text-center border border-neutral-200/80 shadow-2xs flex flex-col items-center justify-center">
-            <Loader2 className="w-6 h-6 text-neutral-400 animate-spin mb-3" />
-            <p className="text-xs text-neutral-500 font-medium">در حال واکشی متادیتا از سرویس پشتیبان...</p>
+            <Loader2 className="w-7 h-7 text-neutral-600 animate-spin mb-3" />
+            <p className="text-xs font-semibold text-neutral-700">در حال واکشی متادیتا از سرویس پشتیبان...</p>
+            <p className="text-[11px] text-neutral-400 mt-1">اتصال به وب‌سرویس و اعتبارسنجی ۶۶ کلید اسکیما</p>
           </div>
         ) : viewMode === 'table' ? (
           <DocumentaryTable
@@ -336,7 +362,7 @@ export default function App() {
           />
         )}
 
-        {/* Pagination */}
+        {/* Section 4: Pagination Controls (MD3 Surface Bar) */}
         {!loading && (
           <PaginationControls
             pagination={pagination}
@@ -344,6 +370,7 @@ export default function App() {
           />
         )}
       </main>
+
 
       {/* Modals */}
       <DocumentaryDetailModal

@@ -8,7 +8,8 @@ import {
   Layers,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Film
 } from 'lucide-react';
 import { DocumentaryMetadata } from '../types/documentary.ts';
 import { parseDurationToSeconds } from '../utils/schemaValidator.ts';
@@ -94,8 +95,12 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
 
   if (documentaries.length === 0) {
     return (
-      <div className="bg-white rounded-2xl p-12 text-center border border-neutral-200/80 shadow-2xs">
-        <p className="text-neutral-500 text-sm">هیچ مستندی با فیلترهای مشخص شده یافت نشد.</p>
+      <div className="bg-white rounded-2xl p-12 text-center border border-neutral-200/80 shadow-2xs flex flex-col items-center justify-center">
+        <div className="w-12 h-12 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-400 mb-3">
+          <Film className="w-6 h-6 stroke-[1.5]" />
+        </div>
+        <h3 className="text-sm font-bold text-neutral-800 mb-1">هیچ مستندی با فیلترهای مشخص شده یافت نشد</h3>
+        <p className="text-neutral-400 text-xs">می‌توانید عبارت جستجو را تغییر دهید یا فیلترهای اعمال‌شده را بازنشانی کنید.</p>
       </div>
     );
   }
@@ -111,6 +116,13 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
     );
   };
 
+  const getHeaderClass = (field: SortField) => {
+    const isActive = sortField === field;
+    return `py-3 px-3.5 sm:px-4 cursor-pointer transition-colors group/th text-right ${
+      isActive ? 'bg-neutral-100/90 text-neutral-900 font-bold' : 'hover:bg-neutral-100/60'
+    }`;
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-2xs border border-neutral-200/80 overflow-hidden">
       <div className="overflow-x-auto max-h-[70vh]">
@@ -120,10 +132,10 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
               {/* شناسه (Asset ID) */}
               <th
                 onClick={() => handleHeaderClick('asset_id')}
-                className="py-3 px-3.5 sm:px-4 cursor-pointer hover:bg-neutral-100/80 transition-colors group/th text-right"
+                className={`${getHeaderClass('asset_id')} w-28 min-w-[105px]`}
                 title="مرتب‌سازی بر اساس شناسه اثر"
               >
-                <div className="flex items-center space-x-1.5 space-x-reverse">
+                <div className="flex items-center gap-1.5">
                   <span>شناسه اثر</span>
                   {renderSortIcon('asset_id')}
                 </div>
@@ -132,10 +144,10 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
               {/* عنوان اثر */}
               <th
                 onClick={() => handleHeaderClick('title_extracted')}
-                className="py-3 px-3.5 sm:px-4 cursor-pointer hover:bg-neutral-100/70 transition-colors group/th"
+                className={`${getHeaderClass('title_extracted')} min-w-[200px]`}
                 title="مرتب‌سازی بر اساس عنوان اثر"
               >
-                <div className="flex items-center space-x-1.5 space-x-reverse">
+                <div className="flex items-center gap-1.5">
                   <span>عنوان اثر</span>
                   {renderSortIcon('title_extracted')}
                 </div>
@@ -144,11 +156,11 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
               {/* کارگردان */}
               <th
                 onClick={() => handleHeaderClick('director')}
-                className="py-3 px-3.5 sm:px-4 hidden md:table-cell cursor-pointer hover:bg-neutral-100/70 transition-colors group/th"
+                className={`${getHeaderClass('director')} hidden md:table-cell w-36 min-w-[130px]`}
                 title="مرتب‌سازی بر اساس نام کارگردان"
               >
-                <div className="flex items-center space-x-1.5 space-x-reverse">
-                  <span>کارگردان (crew.director)</span>
+                <div className="flex items-center gap-1.5">
+                  <span>کارگردان</span>
                   {renderSortIcon('director')}
                 </div>
               </th>
@@ -156,11 +168,11 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
               {/* قالب و نوع */}
               <th
                 onClick={() => handleHeaderClick('format_category')}
-                className="py-3 px-3.5 sm:px-4 hidden sm:table-cell cursor-pointer hover:bg-neutral-100/70 transition-colors group/th"
+                className={`${getHeaderClass('format_category')} hidden sm:table-cell w-44 min-w-[160px]`}
                 title="مرتب‌سازی بر اساس قالب مستند"
               >
-                <div className="flex items-center space-x-1.5 space-x-reverse">
-                  <span>قالب و نوع</span>
+                <div className="flex items-center gap-1.5">
+                  <span>قالب و ساختار</span>
                   {renderSortIcon('format_category')}
                 </div>
               </th>
@@ -168,10 +180,10 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
               {/* موضوع اصلی */}
               <th
                 onClick={() => handleHeaderClick('main_topic')}
-                className="py-3 px-3.5 sm:px-4 hidden sm:table-cell cursor-pointer hover:bg-neutral-100/70 transition-colors group/th"
+                className={`${getHeaderClass('main_topic')} hidden sm:table-cell w-36 min-w-[130px]`}
                 title="مرتب‌سازی بر اساس موضوع اصلی"
               >
-                <div className="flex items-center space-x-1.5 space-x-reverse">
+                <div className="flex items-center gap-1.5">
                   <span>موضوع اصلی</span>
                   {renderSortIcon('main_topic')}
                 </div>
@@ -181,14 +193,11 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
               <th
                 onClick={() => handleHeaderClick('duration_exact')}
                 id="header-duration-exact"
-                className={`py-3 px-3.5 sm:px-4 hidden lg:table-cell cursor-pointer transition-colors group/th ${
-                  sortField === 'duration_exact' ? 'bg-neutral-100/90 text-neutral-900 font-bold' : 'hover:bg-neutral-100/70'
-                }`}
+                className={`${getHeaderClass('duration_exact')} hidden lg:table-cell w-28 min-w-[100px]`}
                 title="کلیک کنید تا به صورت صعودی و نزولی مرتب شود"
               >
-                <div className="flex items-center space-x-1.5 space-x-reverse">
+                <div className="flex items-center gap-1.5">
                   <span className="font-bold">مدت زمان</span>
-                  <span className="text-[10px] text-neutral-400 font-normal">(دقیق)</span>
                   {renderSortIcon('duration_exact')}
                 </div>
               </th>
@@ -196,10 +205,10 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
               {/* امتیاز عمار */}
               <th
                 onClick={() => handleHeaderClick('ammar_discourse_score')}
-                className="py-3 px-3.5 sm:px-4 hidden sm:table-cell cursor-pointer hover:bg-neutral-100/70 transition-colors group/th"
+                className={`${getHeaderClass('ammar_discourse_score')} hidden sm:table-cell w-24 min-w-[85px]`}
                 title="مرتب‌سازی بر اساس امتیاز گفتمان عمار"
               >
-                <div className="flex items-center space-x-1.5 space-x-reverse">
+                <div className="flex items-center gap-1.5">
                   <span>امتیاز عمار</span>
                   {renderSortIcon('ammar_discourse_score')}
                 </div>
@@ -208,17 +217,17 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
               {/* وضعیت ناظر */}
               <th
                 onClick={() => handleHeaderClick('human_verification_status')}
-                className="py-3 px-3.5 sm:px-4 cursor-pointer hover:bg-neutral-100/70 transition-colors group/th"
+                className={`${getHeaderClass('human_verification_status')} w-32 min-w-[115px]`}
                 title="مرتب‌سازی بر اساس وضعیت تایید"
               >
-                <div className="flex items-center space-x-1.5 space-x-reverse">
+                <div className="flex items-center gap-1.5">
                   <span>وضعیت ناظر</span>
                   {renderSortIcon('human_verification_status')}
                 </div>
               </th>
 
               {/* عملیات */}
-              <th className="py-3 px-3.5 sm:px-4 text-left font-semibold">
+              <th className="py-3 px-3.5 sm:px-4 text-left font-semibold w-28 min-w-[100px]">
                 عملیات
               </th>
             </tr>
@@ -236,46 +245,46 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
               return (
                 <tr
                   key={doc.asset_id}
-                  className="hover:bg-neutral-50/70 transition-colors group cursor-pointer"
+                  className="hover:bg-neutral-50/80 transition-colors group cursor-pointer"
                   onClick={() => onSelectDoc(doc)}
                 >
                   {/* Asset ID */}
-                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 font-mono text-[11px] text-neutral-500 whitespace-nowrap">
-                    <span className="bg-neutral-100 text-neutral-800 px-2.5 py-0.5 rounded-md font-medium">
+                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 font-mono text-[11px] text-neutral-500 whitespace-nowrap w-28 min-w-[105px]">
+                    <span className="bg-neutral-100 text-neutral-800 px-2.5 py-0.5 rounded-lg font-semibold border border-neutral-200/80 inline-block shadow-2xs">
                       {doc.asset_id}
                     </span>
                   </td>
 
                   {/* Title */}
-                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4">
-                    <div className="font-semibold text-neutral-900 line-clamp-1">
+                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 min-w-[200px]">
+                    <div className="font-bold text-neutral-900 line-clamp-1 group-hover:text-black">
                       {doc.title_extracted}
                     </div>
                     {doc.international_title && (
-                      <div className="text-[11px] text-neutral-400 font-normal truncate max-w-xs" dir="ltr">
+                      <div className="text-[11px] text-neutral-400 font-normal truncate max-w-xs mt-0.5" dir="ltr">
                         {doc.international_title}
                       </div>
                     )}
                   </td>
 
                   {/* Director */}
-                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 text-neutral-700 font-medium hidden md:table-cell whitespace-nowrap">
+                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 text-neutral-700 font-medium hidden md:table-cell whitespace-nowrap text-xs w-36 min-w-[130px]">
                     {doc.crew.director || '—'}
                   </td>
 
                   {/* Format & Series */}
-                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 hidden sm:table-cell whitespace-nowrap">
+                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 hidden sm:table-cell whitespace-nowrap w-44 min-w-[160px]">
                     <div className="flex items-center gap-1.5">
-                      <span className="bg-neutral-100 text-neutral-700 text-xs px-2.5 py-0.5 rounded-md font-medium">
+                      <span className="bg-neutral-100 text-neutral-700 text-xs px-2.5 py-0.5 rounded-lg font-medium border border-neutral-200/60">
                         {doc.format_category || 'فیلم مستند'}
                       </span>
                       {isSeriesBool ? (
-                        <span className="bg-blue-50 text-blue-700 border border-blue-200/60 text-[10px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <span className="bg-blue-50 text-blue-700 border border-blue-200/60 text-[10px] font-semibold px-2 py-0.5 rounded-lg flex items-center gap-1">
                           <Layers className="w-2.5 h-2.5" />
                           <span>مجموعه</span>
                         </span>
                       ) : (
-                        <span className="bg-neutral-50 text-neutral-400 border border-neutral-200/50 text-[10px] px-2 py-0.5 rounded-md">
+                        <span className="bg-neutral-50 text-neutral-400 border border-neutral-200/50 text-[10px] px-2 py-0.5 rounded-lg">
                           تک‌قسمتی
                         </span>
                       )}
@@ -283,30 +292,30 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
                   </td>
 
                   {/* Main Topic */}
-                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 hidden sm:table-cell whitespace-nowrap">
-                    <span className="inline-block bg-neutral-50 border border-neutral-200/70 text-neutral-700 text-xs px-2.5 py-0.5 rounded-md">
+                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 hidden sm:table-cell whitespace-nowrap w-36 min-w-[130px]">
+                    <span className="inline-block bg-neutral-50 border border-neutral-200/70 text-neutral-700 text-xs px-2.5 py-0.5 rounded-lg truncate max-w-[140px]">
                       {doc.main_topic || 'نامشخص'}
                     </span>
                   </td>
 
                   {/* Duration - Highlighted cell */}
-                  <td className={`py-2.5 sm:py-3 px-3.5 sm:px-4 font-mono text-xs hidden lg:table-cell whitespace-nowrap ${
-                    sortField === 'duration_exact' ? 'font-bold text-neutral-900 bg-neutral-50/50' : 'text-neutral-600'
+                  <td className={`py-2.5 sm:py-3 px-3.5 sm:px-4 font-mono text-xs hidden lg:table-cell whitespace-nowrap tabular-nums w-28 min-w-[100px] ${
+                    sortField === 'duration_exact' ? 'font-bold text-neutral-900 bg-neutral-100/60' : 'text-neutral-600'
                   }`}>
                     {doc.duration_exact || '—'}
                   </td>
 
                   {/* Discourse Score */}
-                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 hidden sm:table-cell whitespace-nowrap">
-                    <span className="inline-flex items-center text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200/60 px-2 py-0.5 rounded-md font-mono">
+                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 hidden sm:table-cell whitespace-nowrap w-24 min-w-[85px]">
+                    <span className="inline-flex items-center text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200/60 px-2 py-0.5 rounded-lg font-mono">
                       {doc.ammar_discourse_score || '—'}
                     </span>
                   </td>
 
                   {/* Verification Status */}
-                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 whitespace-nowrap">
+                  <td className="py-2.5 sm:py-3 px-3.5 sm:px-4 whitespace-nowrap w-32 min-w-[115px]">
                     <span
-                      className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-0.5 rounded-full ${
+                      className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
                         isVerified
                           ? 'bg-emerald-50 text-emerald-800 border border-emerald-200/70'
                           : 'bg-amber-50 text-amber-800 border border-amber-200/70'
@@ -328,10 +337,10 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
 
                   {/* Actions */}
                   <td
-                    className="py-2.5 sm:py-3 px-3.5 sm:px-4 text-left whitespace-nowrap"
+                    className="py-2.5 sm:py-3 px-3.5 sm:px-4 text-left whitespace-nowrap w-28 min-w-[100px]"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <div className="flex items-center justify-end space-x-1 space-x-reverse">
+                    <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => onViewJson(doc)}
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 transition-colors select-none active:scale-95"
@@ -368,3 +377,4 @@ export const DocumentaryTable: React.FC<DocumentaryTableProps> = ({
     </div>
   );
 };
+

@@ -44,94 +44,109 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" dir="rtl">
-      {/* کارت اول: تعداد کل آثار موجود */}
-      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:border-neutral-300 transition-all flex items-center justify-between min-h-[104px]">
-        <div className="flex flex-col justify-center min-w-0">
-          <span className="text-xs font-medium text-neutral-500 block mb-1 whitespace-nowrap">
+      {/* کارت اول: تعداد کل آثار موجود (MD3 Outlined Card) */}
+      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:shadow-xs hover:border-neutral-300 transition-all flex flex-col justify-between min-h-[114px] group">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold text-neutral-500 block truncate">
             تعداد کل آثار موجود
           </span>
-          <div className="flex items-baseline space-x-1.5 space-x-reverse whitespace-nowrap">
-            <span className="text-2xl sm:text-[26px] font-extrabold tracking-tight text-neutral-900 tabular-nums font-mono leading-none">
+          <div className="w-9.5 h-9.5 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-700 shrink-0 group-hover:bg-neutral-200/70 transition-colors">
+            <Film className="w-4.5 h-4.5 stroke-[1.75]" />
+          </div>
+        </div>
+        <div>
+          <div className="flex items-baseline gap-1.5 whitespace-nowrap mb-1">
+            <span className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-neutral-900 tabular-nums font-mono leading-none">
               {count.toLocaleString('fa-IR')}
             </span>
-            <span className="text-xs text-neutral-500 font-medium mr-1">
+            <span className="text-xs text-neutral-500 font-medium">
               اثر ثبت‌شده
             </span>
           </div>
-          <span className="text-[11px] text-neutral-400 mt-1 block truncate font-medium">
-            مخزن فعال شیت
+          <span className="text-[11px] text-neutral-400 block truncate font-medium">
+            مخزن فعال شیت • ۶۶ ستون متادیتا
           </span>
-        </div>
-        <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-700 shrink-0">
-          <Film className="w-5 h-5 stroke-[1.75]" />
         </div>
       </div>
 
       {/* کارت دوم: مجموع زمان کل مستندها */}
-      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:border-neutral-300 transition-all flex items-center justify-between min-h-[104px]">
-        <div className="flex flex-col justify-center min-w-0">
-          <span className="text-xs font-medium text-neutral-500 block mb-1 whitespace-nowrap">
+      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:shadow-xs hover:border-neutral-300 transition-all flex flex-col justify-between min-h-[114px] group">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold text-neutral-500 block truncate">
             مجموع زمان کل مستندها
           </span>
-          <div className="whitespace-nowrap">
-            <span className="text-xl sm:text-[22px] font-extrabold tracking-tight text-neutral-900 tabular-nums font-mono leading-none">
+          <div className="w-9.5 h-9.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-100/60 flex items-center justify-center shrink-0 group-hover:bg-blue-100/80 transition-colors">
+            <Clock className="w-4.5 h-4.5 stroke-[1.75]" />
+          </div>
+        </div>
+        <div>
+          <div className="whitespace-nowrap mb-1">
+            <span className="text-xl sm:text-[24px] font-extrabold tracking-tight text-neutral-900 tabular-nums font-mono leading-none">
               {formattedDuration}
             </span>
           </div>
-          <span className="text-[11px] text-neutral-400 mt-1 block font-mono truncate font-medium" dir="rtl">
-            {totalSeconds.toLocaleString('fa-IR')} ثانیه کل
+          <span className="text-[11px] text-neutral-400 block font-mono truncate font-medium" dir="rtl">
+            {totalSeconds.toLocaleString('fa-IR')} ثانیه محتوای ویدیویی
           </span>
-        </div>
-        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-          <Clock className="w-5 h-5 stroke-[1.75]" />
         </div>
       </div>
 
       {/* کارت سوم: میانگین گفتمان عمار */}
-      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:border-neutral-300 transition-all flex items-center justify-between min-h-[104px]">
-        <div className="flex flex-col justify-center min-w-0">
-          <span className="text-xs font-medium text-neutral-500 block mb-1 whitespace-nowrap">
+      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:shadow-xs hover:border-neutral-300 transition-all flex flex-col justify-between min-h-[114px] group">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-semibold text-neutral-500 block truncate">
             میانگین گفتمان عمار
           </span>
-          <div className="flex items-baseline space-x-1.5 space-x-reverse whitespace-nowrap">
-            <span className="text-2xl sm:text-[26px] font-extrabold tracking-tight text-neutral-900 tabular-nums font-mono leading-none">
+          <div className="w-9.5 h-9.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-100/60 flex items-center justify-center shrink-0 group-hover:bg-amber-100/80 transition-colors">
+            <Award className="w-4.5 h-4.5 stroke-[1.75]" />
+          </div>
+        </div>
+        <div>
+          <div className="flex items-baseline gap-1.5 whitespace-nowrap mb-1">
+            <span className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-neutral-900 tabular-nums font-mono leading-none">
               {avgScore}
             </span>
-            <span className="text-xs text-neutral-500 font-medium mr-1">
+            <span className="text-xs text-neutral-500 font-medium">
               از ۱۰
             </span>
           </div>
-          <span className="text-[11px] text-neutral-400 mt-1 block truncate font-medium">
-            شاخص محتوایی جشنواره
+          <span className="text-[11px] text-neutral-400 block truncate font-medium">
+            شاخص محتوایی جشنواره عمار
           </span>
-        </div>
-        <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-          <Award className="w-5 h-5 stroke-[1.75]" />
         </div>
       </div>
 
-      {/* کارت چهارم: وضعیت بررسی ناظران */}
-      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:border-neutral-300 transition-all flex items-center justify-between min-h-[104px]">
-        <div className="flex flex-col justify-center min-w-0">
-          <span className="text-xs font-medium text-neutral-500 block mb-1 whitespace-nowrap">
+      {/* کارت چهارم: وضعیت بررسی ناظران با نوار پیشرفت MD3 */}
+      <div className="bg-white p-4.5 rounded-2xl border border-neutral-200/80 shadow-2xs hover:shadow-xs hover:border-neutral-300 transition-all flex flex-col justify-between min-h-[114px] group">
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-xs font-semibold text-neutral-500 block truncate">
             وضعیت بررسی ناظران
           </span>
-          <div className="flex items-baseline space-x-1.5 space-x-reverse whitespace-nowrap">
-            <span className="text-2xl sm:text-[26px] font-extrabold tracking-tight text-emerald-600 tabular-nums font-mono leading-none">
+          <div className="w-9.5 h-9.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100/60 flex items-center justify-center shrink-0 group-hover:bg-emerald-100/80 transition-colors">
+            <CheckCircle2 className="w-4.5 h-4.5 stroke-[1.75]" />
+          </div>
+        </div>
+        <div>
+          <div className="flex items-baseline gap-1.5 whitespace-nowrap mb-1">
+            <span className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-emerald-600 tabular-nums font-mono leading-none">
               {verifiedPercent}%
             </span>
-            <span className="text-xs font-semibold text-emerald-700 mr-1">
+            <span className="text-xs font-semibold text-emerald-700">
               تایید شده
             </span>
           </div>
-          <span className="text-[11px] text-neutral-400 mt-1 block truncate font-medium">
-            {verifiedCount} اثر تایید | {count - verifiedCount} در انتظار
+          <div className="w-full bg-neutral-100 rounded-full h-1.5 mb-1.5 overflow-hidden">
+            <div
+              className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
+              style={{ width: `${verifiedPercent}%` }}
+            />
+          </div>
+          <span className="text-[10.5px] text-neutral-400 block truncate font-medium">
+            {verifiedCount.toLocaleString('fa-IR')} تایید | {(count - verifiedCount).toLocaleString('fa-IR')} در انتظار
           </span>
-        </div>
-        <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
-          <CheckCircle2 className="w-5 h-5 stroke-[1.75]" />
         </div>
       </div>
     </div>
   );
 };
+

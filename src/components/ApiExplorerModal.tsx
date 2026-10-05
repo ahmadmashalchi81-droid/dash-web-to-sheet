@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Play, Copy, Check, Terminal, Code2 } from 'lucide-react';
+import { X, Play, Copy, Check, Terminal } from 'lucide-react';
 
 interface ApiExplorerModalProps {
   isOpen: boolean;
@@ -56,16 +56,16 @@ export const ApiExplorerModal: React.FC<ApiExplorerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/45 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
       <div
-        className="bg-white w-full max-w-4xl rounded-2xl shadow-xl border border-neutral-200/80 flex flex-col max-h-[90vh] overflow-hidden"
+        className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl border border-neutral-200/80 flex flex-col max-h-[90vh] overflow-hidden"
         dir="rtl"
       >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-neutral-200/80 flex items-center justify-between bg-neutral-50/60">
-          <div className="flex items-center space-x-2.5 space-x-reverse">
-            <div className="w-9 h-9 rounded-xl bg-neutral-900 text-white flex items-center justify-center shadow-xs">
-              <Terminal className="w-4 h-4" />
+          <div className="flex items-center space-x-3 space-x-reverse">
+            <div className="w-9.5 h-9.5 rounded-xl bg-neutral-900 text-white flex items-center justify-center shadow-xs">
+              <Terminal className="w-4.5 h-4.5" />
             </div>
             <div>
               <h3 className="text-base font-bold text-neutral-900">
@@ -79,42 +79,43 @@ export const ApiExplorerModal: React.FC<ApiExplorerModalProps> = ({
 
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-neutral-400 hover:text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors active:scale-95"
+            title="بستن پنجره"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Preset chips */}
-        <div className="px-4 sm:px-6 py-3 border-b border-neutral-100 bg-neutral-50/30 flex items-center gap-2 overflow-x-auto text-xs">
-          <span className="text-neutral-500 font-medium whitespace-nowrap">پیش‌فرض‌ها:</span>
+        <div className="px-4 sm:px-6 py-2.5 border-b border-neutral-100 bg-neutral-50/40 flex items-center gap-2 overflow-x-auto text-xs">
+          <span className="text-neutral-500 font-medium whitespace-nowrap text-[11px]">پیش‌فرض‌ها:</span>
           {presets.map((p, i) => (
             <button
               key={i}
               onClick={() => setEndpoint(p.url)}
-              className="px-2.5 py-1 rounded-md bg-white border border-neutral-200 text-neutral-700 hover:border-neutral-900 hover:text-neutral-900 whitespace-nowrap transition-colors"
+              className="px-2.5 py-1 rounded-lg bg-white border border-neutral-200/80 text-neutral-700 hover:border-neutral-900 hover:text-neutral-900 whitespace-nowrap transition-colors text-xs font-medium shadow-2xs"
             >
               {p.label}
             </button>
           ))}
         </div>
 
-        {/* Endpoint Input bar */}
+        {/* Endpoint Input bar (Unified 40px height) */}
         <div className="p-4 sm:p-6 border-b border-neutral-100 flex items-center gap-2">
-          <span className="text-xs font-mono font-bold bg-neutral-900 text-white px-2.5 py-2 rounded-lg">
+          <span className="h-10 px-3 flex items-center justify-center text-xs font-mono font-bold bg-neutral-900 text-white rounded-xl select-none">
             GET
           </span>
           <input
             type="text"
             value={endpoint}
             onChange={(e) => setEndpoint(e.target.value)}
-            className="flex-1 px-3 py-2 text-xs font-mono bg-neutral-50 border border-neutral-200 rounded-lg text-neutral-900 focus:outline-none focus:ring-1 focus:ring-neutral-900 focus:bg-white transition-all"
+            className="h-10 flex-1 px-3 text-xs font-mono bg-neutral-50/80 border border-neutral-200 rounded-xl text-neutral-900 focus:outline-none focus:ring-1 focus:ring-black focus:bg-white transition-all"
             dir="ltr"
           />
           <button
             onClick={handleExecute}
             disabled={loading}
-            className="inline-flex items-center space-x-1.5 space-x-reverse px-4 py-2 text-xs font-medium text-white bg-neutral-900 hover:bg-neutral-800 rounded-lg transition-colors disabled:opacity-50"
+            className="h-10 inline-flex items-center space-x-1.5 space-x-reverse px-4 text-xs font-semibold text-white bg-black hover:bg-neutral-800 rounded-xl shadow-xs transition-all disabled:opacity-50 select-none active:scale-95"
           >
             <Play className={`w-3.5 h-3.5 fill-current ${loading ? 'animate-pulse' : ''}`} />
             <span>{loading ? 'در حال ارسال...' : 'ارسال درخواست'}</span>
@@ -124,14 +125,14 @@ export const ApiExplorerModal: React.FC<ApiExplorerModalProps> = ({
         {/* Output area */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
           {/* cURL instruction */}
-          <div className="bg-neutral-900 text-neutral-200 p-3 rounded-xl flex items-center justify-between font-mono text-xs" dir="ltr">
+          <div className="bg-neutral-900 text-neutral-200 p-3.5 rounded-xl flex items-center justify-between font-mono text-xs" dir="ltr">
             <div className="truncate pr-2 text-neutral-300">
               <span className="text-emerald-400 font-bold">$ </span>
               {curlCommand}
             </div>
             <button
               onClick={handleCopyCurl}
-              className="p-1.5 text-neutral-400 hover:text-white rounded bg-neutral-800 transition-colors shrink-0"
+              className="p-1.5 text-neutral-400 hover:text-white rounded-lg bg-neutral-800 transition-colors shrink-0"
               title="کپی دستور cURL"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -183,7 +184,7 @@ export const ApiExplorerModal: React.FC<ApiExplorerModalProps> = ({
         <div className="p-4 border-t border-neutral-100 bg-neutral-50/50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-xs font-medium text-neutral-700 bg-white border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+            className="h-9 px-4 text-xs font-medium text-neutral-700 bg-white border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors shadow-2xs"
           >
             بستن
           </button>
@@ -192,3 +193,4 @@ export const ApiExplorerModal: React.FC<ApiExplorerModalProps> = ({
     </div>
   );
 };
+
